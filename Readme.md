@@ -6,7 +6,7 @@
 **2D platform game** in which you control a character who throws **Electro Shock** to destroy these enemies. To **complete a level** you must reach the **finish flag**.
 It integrates `Intro Screen`, `Main Menu`, `Level`, `Game Over` and `Game End`. It comes with a **[Level Editor](https://github.com/Is-Daouda/is-Engine-Level-Editor)** that allows you to create your own levels and integrate them into the Demo.
 
-[image](./images/demo_screen.png)
+![image](./images/demo_screen.png)
 
 You can download the Android Demo **[here](./demo-apk/is-Engine-v2.2-demo.apk)**
 
