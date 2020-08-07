@@ -23,8 +23,8 @@
 - Move the **AndroidStudio project** of is::Engine to your **C:/** (C:/AndroidStudio)
 - Open the **AndroidStudio** folder with **Android Studio** and start the compilation.
 
-If all goes well you will have a *2D Platform Game* on your *Android emulator*
+If all goes well you will have a **2D Platform Game** on your **Android emulator**
 
-![Image](./images/demo_screen.png)
+![Image](https://github.com/Is-Daouda/is-Engine-Demo/raw/master/images/demo_screen.png)
 
 **Enjoy!**
