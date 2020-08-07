@@ -6,12 +6,12 @@
 **2D platform game** in which you control a character who throws **Electro Shock** to destroy these enemies. To **complete a level** you must reach the **finish flag**.
 It integrates **intro screen, main menu, levels, game over and congratulation**. It comes with a **[Level Editor](https://github.com/Is-Daouda/is-Engine-Level-Editor)** that allows you to create your own levels and integrate them into the Demo.
 
-![image](./images/demo_screen.png)
+[image](./images/demo_screen.png)
 
 You can download the Android Demo **![here](./demo-apk/is-Engine-v2.2-demo.apk)**
 
 ## About the project components
-- These scenes : **Intro, Main Menu, Game Over and Congratulation** were created with the engine's standard tools
+- These scenes : `Intro, Main Menu, Game Over and Congratulation` were created with the engine's standard tools
 - A tool to **configure the Virtual Game Pad (Only for Android)** has been integrated into the **Main Menu**
 - An option to manage **sounds, music, vibration (on Android), game language** are in the **Main Menu**
 - The **GameLevel scene (Level)** was created with the **SDM (Step and Draw Manager) a tool which automatically manages the window and the objects of the scene (level) by updating and displaying them automatically**
@@ -49,7 +49,7 @@ You can download the Android Demo **![here](./demo-apk/is-Engine-v2.2-demo.apk)*
 Everything has already been configured all you need to do in relation to the tree (3) projects is to link the libraries
 
 ## Description of the project structure:
-![header](./images/is_Engine_structure.png)
+![header](./images/is_Engine_structure.jpg)
 ----------------------------
 #### `main.cpp` file
 Contains the entry point of the program, inside there are two instructions :
