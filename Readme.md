@@ -4,7 +4,7 @@
 # is::Engine (Infinity Solutions::Engine) v2.2 Demo
 
 **2D platform game** in which you control a character who throws **Electro Shock** to destroy these enemies. To **complete a level** you must reach the **finish flag**.
-It integrates **intro screen, main menu, levels, game over and congratulation**. It comes with a **[Level Editor](https://github.com/Is-Daouda/is-Engine-Level-Editor)** that allows you to create your own levels and integrate them into the Demo.
+It integrates `intro screen, main menu, levels, game over and congratulation`. It comes with a **[Level Editor](https://github.com/Is-Daouda/is-Engine-Level-Editor)** that allows you to create your own levels and integrate them into the Demo.
 
 [image](./images/demo_screen.png)
 
@@ -12,10 +12,10 @@ You can download the Android Demo **![here](./demo-apk/is-Engine-v2.2-demo.apk)*
 
 ## About the project components
 - These scenes : `Intro, Main Menu, Game Over and Congratulation` were created with the engine's standard tools
-- A tool to **configure the Virtual Game Pad (Only for Android)** has been integrated into the **Main Menu**
-- An option to manage **sounds, music, vibration (on Android), game language** are in the **Main Menu**
-- The **GameLevel scene (Level)** was created with the **SDM (Step and Draw Manager) a tool which automatically manages the window and the objects of the scene (level) by updating and displaying them automatically**
-- The **configuration of the keyboard keys** (Windows / Linux) and **the project (window size, title, author, file path, ...)** can be found in **GameConfig.h**
+- A tool to `configure the Virtual Game Pad` (Only for Android) has been integrated into the **Main Menu**
+- An option to manage `sounds, music, vibration (on Android), game language` are in the **Main Menu**
+- The `GameLevel scene` (Level) was created with the `SDM (Step and Draw Manager)` a tool which **automatically manages the window and the objects of the scene (level) by updating and displaying them automatically**
+- The `configuration of the keyboard keys` (Windows / Linux) and `the project (window size, title, author, file path, ...)` can be found in `GameConfig.h`
 
 ## Example of a project created with the engine
 - [I Can Transform](https://play.google.com/store/apps/details?id=com.isdaouda.icantransform&hl=En)
