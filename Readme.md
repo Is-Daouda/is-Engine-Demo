@@ -1,6 +1,3 @@
-![header](./images/is_Engine_logo.png)
-----------------------------
-
 # is::Engine (Infinity Solutions::Engine) v2.2 Demo
 
 **2D platform game** in which you control a character who throws **Electro Shock** to destroy these enemies. To **complete a level** you must reach the **finish flag**.
