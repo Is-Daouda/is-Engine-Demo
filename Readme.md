@@ -5,7 +5,7 @@ It integrates `Intro Screen`, `Main Menu`, `Level`, `Game Over` and `Congratulat
 
 ![image](./images/demo_screen.png)
 
-You can download the Android Demo **[[image](https://github.com/Is-Daouda/is-Engine-Demo/blob/master/CodeBlocks/data/image/gui/icon.png)](./demo-apk/is-Engine-v2.2-demo.apk)**
+You can download the Android Demo **[![image](https://github.com/Is-Daouda/is-Engine-Demo/blob/master/CodeBlocks/data/image/gui/icon.png)](./demo-apk/is-Engine-v2.2-demo.apk)**
 
 ## About the project components
 - These scenes : `Intro`, `Main Menu`, `Game Over` and `Congratulation` were created with the engine's standard tools
