@@ -49,7 +49,7 @@ You can download the Android Demo **![here](./demo-apk/is-Engine-v2.2-demo.apk)*
 Everything has already been configured all you need to do in relation to the tree (3) projects is to link the libraries
 
 ## Description of the project structure:
-![header](./images/is_Engine_structure.jpg)
+![header](./images/is_Engine_structure.png)
 ----------------------------
 #### `main.cpp` file
 Contains the entry point of the program, inside there are two instructions :
