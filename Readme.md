@@ -8,13 +8,13 @@ It integrates `Intro Screen`, `Main Menu`, `Level`, `Game Over` and `Congratulat
 
 [image](./images/demo_screen.png)
 
-You can download the Android Demo **![here](./demo-apk/is-Engine-v2.2-demo.apk)**
+You can download the Android Demo **[here](./demo-apk/is-Engine-v2.2-demo.apk)**
 
 ## About the project components
 - These scenes : `Intro`, `Main Menu`, `Game Over` and `Congratulation` were created with the engine's standard tools
 - A tool to configure the `Virtual Game Pad` (Only for Android) has been integrated into the **Main Menu**
 - An option to manage `sounds`, `music`, `vibration` (on Android), `game language` are in the **Main Menu**
-- The `GameLevel scene` (Level) was created with the `SDM (Step and Draw Manager)` a tool which **automatically manages the window and the objects of the scene (level) by updating and displaying them automatically**
+- The `Game Level scene` (Level) was created with the `SDM (Step and Draw Manager)` a tool which **automatically manages the window and the objects of the scene by updating and displaying them automatically**
 - The configuration of the `keyboard keys` (Windows / Linux) and `the project` (window size, title, author, file path, ...) can be found in `GameConfig.h`
 
 ## Example of a project created with the engine
