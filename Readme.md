@@ -1,4 +1,4 @@
-# is::Engine (Infinity Solutions::Engine) v2.2 Demo
+# is::Engine (Infinity Solutions::Engine) Demo
 
 **2D platform game** in which you control a character who throws **Electro Shock** to destroy these enemies. To **complete a level** you must reach the **finish flag**.
 It integrates `Intro Screen`, `Main Menu`, `Level`, `Game Over` and `Game End`. It comes with a **[Level Editor](https://github.com/Is-Daouda/is-Engine-Level-Editor)** that allows you to create your own levels and integrate them into the Demo.
@@ -7,7 +7,7 @@ It integrates `Intro Screen`, `Main Menu`, `Level`, `Game Over` and `Game End`. 
 
 You can download the Android Demo **[here](./demo-apk/is-Engine-v2.2-demo.apk)**
 
-## About the project components
+## About the project
 - These scenes : `Intro`, `Main Menu`, `Game Over` and `Game End` were created with the engine's standard tools
 - A tool to configure the `Virtual Game Pad` (only for Android) has been integrated into the `Main Menu`
 - An option to manage `sounds`, `music`, `vibration` (on Android), `game language` are in the `Main Menu`
