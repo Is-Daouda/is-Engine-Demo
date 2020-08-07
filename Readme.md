@@ -14,7 +14,7 @@ You can download the Android Demo **[here](./demo-apk/is-Engine-v2.2-demo.apk)**
 - These scenes : `Intro`, `Main Menu`, `Game Over` and `Game End` were created with the engine's standard tools
 - A tool to configure the `Virtual Game Pad` (only for Android) has been integrated into the `Main Menu`
 - An option to manage `sounds`, `music`, `vibration` (on Android), `game language` are in the `Main Menu`
-- The `Level` was created with the `SDM (Step and Draw Manager)` a tool which **automatically manages the window and the objects of the scene by updating and displaying them automatically**
+- The `Level` was created with the `SDM (Step and Draw Manager)` a tool which **automatically manages the window and the objects of the scene by updating and displaying them**
 - The configuration of the `keyboard keys` (Windows / Linux) and `the project` (window size, title, author, file path, ...) can be found in `GameConfig.h`
 
 ## Example of a project created with the engine
