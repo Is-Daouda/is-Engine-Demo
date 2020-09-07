@@ -1,0 +1,291 @@
+#include "GameLevel.h"
+
+void GameLevel::loadResources()
+{
+    GameDisplay::loadParentResources();
+
+    is::loadSFMLObjResource(m_texToolsPad, is::GameConfig::GUI_DIR + "tools_pad.png");
+    is::loadSFMLObjResource(m_texJoystick, is::GameConfig::GUI_DIR + "game_pad.png");
+    is::loadSFMLObjResource(m_texIcoMenuBtn, is::GameConfig::GUI_DIR + "ico_button.png");
+
+    auto gameKey = std::make_shared<is::GameKeyData>(this);
+    gameKey->loadResources(m_texJoystick);
+    gameKey->setDepth(-9);
+
+    // We add the object to the SDM container but we order it to display it only
+    // We also give it a name that will allow us to identify it in the container
+    // It will be updated in the SDMmanageSceneEvents() method of GameLevel Class
+    SDMaddSceneObject(gameKey, false, true, "GameKeyData");
+
+    // load sounds with GSM
+    GSMaddSound("1_up", is::GameConfig::SFX_DIR + "1_up.wav");
+    GSMaddSound("break_block", is::GameConfig::SFX_DIR + "break_block.wav");
+    GSMaddSound("bump", is::GameConfig::SFX_DIR + "bump.wav");
+    GSMaddSound("coin", is::GameConfig::SFX_DIR + "coin.wav");
+    GSMaddSound("fireball", is::GameConfig::SFX_DIR + "fireball.ogg");
+    GSMaddSound("flagpole", is::GameConfig::SFX_DIR + "flagpole.wav");
+    GSMaddSound("jump_small", is::GameConfig::SFX_DIR + "jump_small.wav");
+    GSMaddSound("jump_super", is::GameConfig::SFX_DIR + "jump_super.wav");
+    GSMaddSound("kick", is::GameConfig::SFX_DIR + "kick.wav");
+    GSMaddSound("mario_die", is::GameConfig::SFX_DIR + "mario_die.wav");
+    GSMaddSound("pause", is::GameConfig::SFX_DIR + "pause.wav");
+    GSMaddSound("pipe", is::GameConfig::SFX_DIR + "pipe.wav");
+    GSMaddSound("powerup", is::GameConfig::SFX_DIR + "powerup.wav");
+    GSMaddSound("powerup_appears", is::GameConfig::SFX_DIR + "powerup_appears.wav");
+    GSMaddSound("stomp", is::GameConfig::SFX_DIR + "stomp.wav");
+    GSMaddSound("warning", is::GameConfig::SFX_DIR + "warning.wav");
+    GSMaddSound("stage_clear", is::GameConfig::SFX_DIR + "stage_clear.wav");
+    GSMaddSound("score_count", is::GameConfig::SFX_DIR + "score_count.wav");
+    GSMgetSound("score_count")->setLoop(true);
+
+    // GUI resources
+    is::loadSFMLObjResource(m_texPad, is::GameConfig::GUI_DIR + "option_pad.png");
+    is::loadSFMLObjResource(m_texDialog, is::GameConfig::GUI_DIR + "dialog_box.png");
+    is::createSprite(m_texPad, m_sprButtonSelect, sf::IntRect(160, 0, 160, 32), sf::Vector2f(0.f, 0.f) , sf::Vector2f(80.f, 16.f));
+
+    // tiles
+    is::loadSFMLObjResource(m_texTile, is::GameConfig::TILES_DIR + "tileset.png");
+
+    // sprites
+    is::loadSFMLObjResource(m_texPlayer, is::GameConfig::SPRITES_DIR + "player.png");
+    is::loadSFMLObjResource(m_texBonus,  is::GameConfig::SPRITES_DIR + "bonus.png");
+    is::loadSFMLObjResource(m_texEnemy,  is::GameConfig::SPRITES_DIR + "enemy.png");
+    is::loadSFMLObjResource(m_texFire,   is::GameConfig::SPRITES_DIR + "fire.png");
+    is::loadSFMLObjResource(m_texEffect, is::GameConfig::SPRITES_DIR + "effect.png");
+
+    // creation of the object which manages the level
+    // but avoid the SDM drawing it
+    auto gameCtrl = std::make_shared<GameController>(CURRENT_LEVEL, m_texBonus, m_texEffect, this);
+    SDMaddSceneObject(gameCtrl, true, false);
+
+    auto gameDialog = std::make_shared<is::GameDialog>(m_texDialog, m_fontSystem, this);
+    gameDialog->setDepth(-8);
+
+    // We add the GameDialog object in the SDM container but the SDM will not update it.
+    // The GameController object will take care of updating it in its step()
+    SDMaddSceneObject(gameDialog, false, true);
+
+    auto player = std::make_shared<Player>(m_texPlayer, m_texFire, gameCtrl->m_timeUp, this);
+    SDMaddSceneObject(player); // We add the object in the SDM container
+
+    auto gameHud = std::make_shared<HUD>(m_fontSystem, m_texBonus, this);
+    SDMaddSceneObject(gameHud); // We add the object in the SDM container
+
+    SDMaddSceneObject(std::make_shared<CancelButton>(m_texToolsPad, this)); // We add the object in the SDM container
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      LEVEL INTERPRETER
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // chose the corresponding level map array
+    short const *mapIndex = is::level::getLevelMap(CURRENT_LEVEL);
+    if (mapIndex == 0) is::showLog("Level Map not found !", true);
+
+    // allow to browse the map array
+    int dataIndex(0);
+
+    // variable to position the objects in level
+    float i(0.f), j(0.f);
+
+    // allow to build tile map
+    std::vector<short> backTileValue;
+
+    // this variables allow to store tile id
+    // signification of 999 = empty tile
+    short backTileNumber(999);
+
+    /*
+     * How does the level interpreter work?
+     * ------------------------------------------------------------------------------------------
+     * It works like the way you write in a book i.e you write from right to left and when you reach
+     * the end you come back to the line and so on. Except that here writing is replaced by the
+     * creation or positioning of level objects.
+     *
+     * Here's how the mechanism works?
+     * -----------------------------------------------------------------------------------------
+     * i, j represents the position of the virtual cursor (represents the hand that writes).
+     * For each value of mapIndex[dataIndex] we execute a specific instruction(s)
+     * The value 1000 represents an empty case (space),
+     * the 1001 allows to move the cursor to the right,
+     * the 1002 puts it back on the line,
+     * 1003 represents the end of the level and the other values allows to manipulate the
+     * objects of the levels.
+     */
+    do
+    {
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      BLOCK
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        if (mapIndex[dataIndex] == 0) // block mask
+            SDMaddSceneObject(std::make_shared<Block>(nullptr, Block::BlockType::BLOCK_INVISIBLE, 32.f * j, 32.f * i, this), false, true);
+        else if (mapIndex[dataIndex] == 1) // block world 1-1
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_DESTRUCTIBLE, 32.f * j, 32.f * i, this, 2.f), false, true);
+        else if (mapIndex[dataIndex] == 2) // block underground
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_DESTRUCTIBLE, 32.f * j, 32.f * i, this, 3.f), false, true);
+        else if (mapIndex[dataIndex] == 3) // block coin
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_COIN, 32.f * j, 32.f * i, this), false, true);
+        else if (mapIndex[dataIndex] == 4) // block with multiple coins
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_MULTI_COIN, 32.f * j, 32.f * i, this), false, true);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      BONUS
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (mapIndex[dataIndex] == 100) // Coin
+            SDMaddSceneObject(std::make_shared<Bonus>(m_texBonus, Bonus::BonusType::COIN, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 101) // Mushroom / Fire Flower
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_MUSHROOM, 32.f * j, 32.f * i, this), false, true);
+        else if (mapIndex[dataIndex] == 102) // Life
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_MUSHROOM_1UP, 32.f * j, 32.f * i, this), false, true);
+        else if (mapIndex[dataIndex] == 103) // Starman
+            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_STARMAN, 32.f * j, 32.f * i, this), false, true);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      ENEMY
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (mapIndex[dataIndex] == 200)
+            SDMaddSceneObject(std::make_shared<Enemy>(m_texEnemy, Enemy::EnemyType::LITTLE_GOOMBA, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 201)
+            SDMaddSceneObject(std::make_shared<Enemy>(m_texEnemy, Enemy::EnemyType::KOOPA_TROOPA, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 202)
+            SDMaddSceneObject(std::make_shared<Enemy>(m_texEnemy, Enemy::EnemyType::PIRANA_PLANT, 32.f * j, 32.f * i, this));
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      PLAYER
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (mapIndex[dataIndex] == 300) // player
+        {
+            if (!m_gameSysExt.m_checkPoint) player->setPosition(32.f * j, (32.f * i) - 16.f);
+        }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      GAMEPLAY OBJECT
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (mapIndex[dataIndex] == 400) // limit the movement of the view
+            SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::VIEW_CONTROLLER, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 401) // finish level
+            SDMaddSceneObject(std::make_shared<FinishObject>(m_texTile, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 402) // the entrance of the first tunnel
+            SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::ENTER_TUNNEL_A, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 403) // exit of the first tunnel
+            SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::TUNNEL_EXIT_A, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 404) // the entrance of the second tunnel
+            SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::ENTER_TUNNEL_B, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 405) // exit of the second tunnel
+            SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::TUNNEL_EXIT_B, 32.f * j, 32.f * i, this));
+        else if (mapIndex[dataIndex] == 406) // check point
+        {
+            // use the position of the game controller as the position of the checkpoint
+            gameCtrl->setPosition(32.f * j, 32.f * i);
+            if (m_gameSysExt.m_checkPoint) player->setPosition(gameCtrl->getX(), gameCtrl->getY() - 16.f);
+        }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      TILES
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (mapIndex[dataIndex] >= 500 && mapIndex[dataIndex] < 700)
+        {
+            backTileNumber = (mapIndex[dataIndex] - 500);
+        }
+        else if (mapIndex[dataIndex] == 1000) // empty tile (empty space)
+        {
+            // empty tile
+            backTileNumber = 999;
+        }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      CURSOR MOVEMENT
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if (mapIndex[dataIndex] == 1001) // move the cursor
+        {
+            // filling the tile number array
+            backTileValue.push_back(backTileNumber);
+
+            // empty tile
+            backTileNumber = 999;
+            j++;
+        }
+        else if (mapIndex[dataIndex] == 1002) // back to the line of cursor
+        {
+            if (m_sceneWidth == 0) m_sceneWidth = static_cast<unsigned int>(j); // define the level width
+            j = 0.f;
+            i++;
+            backTileNumber = 999; // empty tile
+            m_sceneHeight = static_cast<unsigned int>(i); // define the level height in pixel
+        }
+        else // error
+        {
+            is::showLog("\nUnknown value  : " + is::numToStr(mapIndex[dataIndex]) + "\n");
+            ///std::terminate();
+        }
+
+        // allow to now the line of cursor
+        dataIndex++;
+    }
+    while (mapIndex[dataIndex] != 1003); // read values in array (1003 = end of tile map)
+
+    // level information
+    is::showLog("\nLevel           : " + is::numToStr(CURRENT_LEVEL + 1) +
+                "\nInstance Number : " + is::numToStr(is::MainObject::instanceNumber) +
+                "\nLevel Width     : " + is::numToStr(m_sceneWidth  * 32) + " (" + is::numToStr(m_sceneWidth) + ")" +
+                "\nLevel Height    : " + is::numToStr(m_sceneHeight * 32) + " (" +is::numToStr(m_sceneHeight) + ")" +
+                "\nLevel Time      : " + is::numToStr(gameCtrl->m_gameTime.getMinute()) + "min : "
+                                       + is::numToStr(gameCtrl->m_gameTime.getSecond()) + "s" +
+                "\n");
+
+    // create the tile map with vertex array
+    unsigned int valX(0), valY(0);
+    int const bgSize(35); // size of vertex array
+    bool stop(false);
+
+    while (!stop)
+    {
+        auto tile = std::make_shared<LevelTile>(m_texTile, this);
+        tile->loadResources(sf::Vector2u(32, 32), backTileValue, m_sceneWidth, m_sceneHeight, valX, valY, bgSize, stop);
+        tile->setDepth(is::DepthObject::BIG_DEPTH);
+        SDMaddSceneObject(tile, false, true, "LevelTile"); // We add the object in the SDM container
+    }
+    for (std::list<std::shared_ptr<is::MainObject>>::iterator it = m_SDMsceneObjects.begin();
+         it != m_SDMsceneObjects.end(); ++it)
+    {
+        if (it->get()->getName() == "LevelTile")
+        {
+            if (!static_cast<LevelTile*>(it->get())->hasTile())
+            {
+                it->reset();
+            }
+        }
+    }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                      CREATION OF THE LEVEL
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // set view position in relation to player
+    player->setStartPosition(player->getX(), player->getY());
+    m_viewX = player->getX();
+    m_viewY = 0.f;
+
+    if (m_viewX < m_viewW / 2) m_viewX = m_viewW / 2;
+    if (m_viewX > static_cast<float>(m_sceneWidth) * 32.f - m_viewW / 2)
+        m_viewX = static_cast<float>(m_sceneWidth) * 32.f - m_viewW / 2;
+
+    if (m_viewY < m_viewH / 2) m_viewY = m_viewH / 2;
+    if (m_viewY > static_cast<float>(m_sceneHeight) * 32.f - m_viewH / 2)
+        m_viewY = static_cast<float>(m_sceneHeight) * 32.f - m_viewH / 2;
+
+    // We add the object in the SDM container, but avoid SDM updating it
+    SDMaddSceneObject(std::make_shared<PauseOption>(this, m_texIcoMenuBtn, m_texPad), false);
+
+    // set HUD position
+    gameHud->setPosition(m_viewX, m_viewY);
+
+    // load level music
+    GSMaddMusic("world_1", is::GameConfig::MUSIC_DIR + "world_1.ogg");
+    GSMgetMusic("world_1")->setLoop(true);
+    GSMaddMusic("underground", is::GameConfig::MUSIC_DIR + "underground.ogg");
+    GSMgetMusic("underground")->setLoop(true);
+    GSMaddMusic("starman", is::GameConfig::MUSIC_DIR + "starman.ogg");
+
+    // Add Start Transition object
+    SDMaddSceneObject(std::make_shared<StartTransition>(m_texPlayer, this));
+}
