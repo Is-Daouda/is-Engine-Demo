@@ -44,7 +44,7 @@ You can download the Android Demo **[here](./demo-apk/is-Engine-Demo-v3.0-demo.a
 
 If all goes well you will have a **Super Mario Bros Game** on your **Android emulator**.
 
-![Image](./images/demo_screen.png)
+![Image](./images/demo_screen_android.png)
 
 **Enjoy!**
 
