@@ -49,7 +49,7 @@ If all goes well you will have a **Super Mario Bros Game** on your **Android emu
 **Enjoy!**
 
 **3. Adding Source Files**
-So that Android Studio can detect your source files (.cpp) and compile them you must include them in the **CMakeLists.txt** file which is in **is-Engine-Demo/app**.
+- So that Android Studio can detect your source files (.cpp) and compile them you must include them in the **CMakeLists.txt** file which is in **is-Engine-Demo/app**.
 
 **4. Application location**
 - The application can be found in **is-Engine-Demo/app/build/outputs/apk**.
