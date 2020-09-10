@@ -6,8 +6,7 @@
 
 You can download the Android Demo **[here](./demo-apk/is-Engine-Demo-v3.0-demo.apk)**
 
-### Video
-[![clip](./images/demo_screen.png)](https://youtu.be/XXkLc3TgCyc)
+### [Video of the Demo](https://youtu.be/XXkLc3TgCyc)
 
 ## About the project components
 - These scenes : `Intro`, `Main Menu` and `Game Over` were created with the engine's standard tools
