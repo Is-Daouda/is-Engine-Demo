@@ -167,10 +167,10 @@ codeblocks "./app/src/main/is-Engine-linux.cbp"
 
 ## Change application icon:
 #### Android
-- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/res](./app/src/main/res/)**** replace all the images (PNG) which are in the **drawable** subfolders.
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/res](./app/src/main/res/)** replace all the images (PNG) which are in the **drawable** subfolders.
 
 #### Windows
-- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/env/windows](./app/src/main/env/windows)**** replace all the images **(Attention CMake uses the same resources).**
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/env/windows](./app/src/main/env/windows)** replace all the images **(Attention CMake uses the same resources).**
 
 #### Linux
 - To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/env/linux](./app/src/main/env/linux)**.
