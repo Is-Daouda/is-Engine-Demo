@@ -28,7 +28,7 @@ You can download the Android Demo **[here](./demo-apk/is-Engine-Demo-v3.0-demo.a
 ---
 
 ## How to use is::Engine with the different development tools:
-## Android Studio
+## ![android](https://i48.servimg.com/u/f48/20/16/75/27/icon_a10.png) Android Studio
 **1. Prerequisites**
 - Android Studio (4.0.1 +)
 - Android SDK and NDK (r20b)
@@ -58,7 +58,7 @@ If all goes well you will have a **Super Mario Bros Game** on your **Android emu
 
 ---
 
-## CMake
+## ![cmake](https://i48.servimg.com/u/f48/20/16/75/27/icon_c11.png) CMake
 **1. Prerequisites**
 - CMake (3.1 +)
 
@@ -91,7 +91,7 @@ sudo make
 
 ---
 
-## Visual Studio Code
+## ![vs](https://i48.servimg.com/u/f48/20/16/75/27/icon_v10.png) Visual Studio Code
 This project uses the template of **andrew-r-king**. For more information on this template [click here](https://github.com/andrew-r-king/sfml-vscode-boilerplate).
 
 **1. Prerequisites**
@@ -130,7 +130,7 @@ code -n "./app/src/main"
 
 ---
 
-## Code::Blocks
+## ![cb](https://i48.servimg.com/u/f48/20/16/75/27/icon_c10.png) Code::Blocks
 **1. Prerequisites**
 
 #### Windows
@@ -165,7 +165,7 @@ codeblocks "./app/src/main/is-Engine-linux.cbp"
 
 ---
 
-## Change application icon:
+## ![icon](https://i48.servimg.com/u/f48/20/16/75/27/icon10.png) Change application icon:
 #### Android
 - To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/res](./app/src/main/res/)** replace all the images (PNG) which are in the **drawable** subfolders.
 
