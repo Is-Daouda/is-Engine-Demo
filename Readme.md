@@ -14,7 +14,7 @@ You can download the Android Demo **[here](./demo-apk/is-Engine-Demo-v3.0-demo.a
 - A tool to configure the `Virtual Game Pad` (only for Android) has been integrated into the `Main Menu`
 - An option to manage `sounds`, `music`, `vibration` (on Android), `game language` are in the `Main Menu`
 - All `scenes` were created with the `SDM (Step and Draw Manager)` a tool which **automatically manages the window and the objects of the scene by updating and displaying them**
-- The configuration of the `keyboard keys` (Windows / Linux) and `the project` (window size, title, author, file path, ...) can be found in `[GameConfig.h](./app/src/main/cpp/app_src/config/GameConfig.h)`
+- The configuration of the `keyboard keys` (Windows / Linux) and `the project` (window size, title, author, file path, ...) can be found in **[GameConfig.h](./app/src/main/cpp/app_src/config/GameConfig.h)**
 
 ## Example of a project created with the engine
 - [I Can Transform](https://play.google.com/store/apps/details?id=com.isdaouda.icantransform&hl=En)
