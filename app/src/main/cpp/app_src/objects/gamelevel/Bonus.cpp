@@ -1,6 +1,6 @@
 #include "Bonus.h"
 
-Bonus::Bonus(sf::Texture &tex, BonusType type, float x, float y, is::GameDisplay *scene):
+Bonus::Bonus(BonusType type, float x, float y, is::GameDisplay *scene):
     MainObject(x, y),
     Step(0),
     ScorePoint(100), // add score for coin
@@ -14,7 +14,11 @@ Bonus::Bonus(sf::Texture &tex, BonusType type, float x, float y, is::GameDisplay
     m_xOffset = 16.f;
     m_yOffset = 16.f;
     setRectangleMask(32, 32);
-    is::createSprite(tex, m_sprParent, sf::IntRect(32 * m_type, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+
+    // We create the sprite of the object.
+    // On SDL this sprite will be blit (Useful for drawing a group of different objects whose
+    // sprites have the same textures. This makes the game more optimized).
+    scene->createSprite("bonus", *this, sf::IntRect(32 * m_type, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
     if (m_type == COIN) m_starting = false;
     else m_strName = "Bonus";
     m_depth = 1;
@@ -57,7 +61,8 @@ void Bonus::step(float const &DELTA_TIME)
                     case STARMAN:
                         player->haveStarPower();
                         m_scene->GSMplaySound("powerup"); // We play this sound
-                        m_scene->GSMgetMusic("world_1")->stop();
+                        m_scene->GSMstopMusic("world_1");
+                        m_scene->GSMstopMusic("world_1_hurry_up");
                         m_scene->GSMplayMusic("starman");
                     break;
 
@@ -67,7 +72,7 @@ void Bonus::step(float const &DELTA_TIME)
                         type = Effect::ONE_UP;
                     break;
                 }
-                if (m_type != COIN) m_scene->SDMaddSceneObject(std::make_shared<Effect>(gameCtrl->m_texEffect, type, m_x, m_y, m_scene));
+                if (m_type != COIN) m_scene->SDMaddSceneObject(std::make_shared<Effect>(type, m_x, m_y, m_scene));
                 m_touchPlayer = true;
             }
         }
@@ -151,10 +156,4 @@ void Bonus::step(float const &DELTA_TIME)
         updateSprite();
         centerCollisionMask(m_x + m_xOffset, m_y + m_yOffset);
     }
-}
-
-void Bonus::draw(sf::RenderTexture &surface)
-{
-    // We draw the object only if it is in the field of vision of the scene view
-    if (m_scene->inViewRec(this)) surface.draw(m_sprParent);
 }

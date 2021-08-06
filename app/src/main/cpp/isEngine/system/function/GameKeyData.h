@@ -1,11 +1,28 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #ifndef GAMEKEYDATA_H_INCLUDED
 #define GAMEKEYDATA_H_INCLUDED
 
-#if defined(IS_ENGINE_USE_SDM)
-#include "../entity/MainObject.h"
-#else
 #include "../display/GameDisplay.h"
-#endif // defined
 
 namespace is
 {
@@ -61,13 +78,13 @@ public:
     GameKeyData(is::GameDisplay *scene);
 
     /// Load the image that will serve as Virtual Game Pad (only for Android)
-    virtual void loadResources(sf::Texture &tex);
+    virtual void loadResources();
 
     /// Manages the positioning of the Virtual Game Pad relative to the screen (only for Android)
     virtual void step(float const &DELTA_TIME);
 
     /// Draw the Virtual Game Pad on the screen (only for Android)
-    virtual void draw(sf::RenderTexture &surface);
+    virtual void draw(is::Render &surface);
 
     /// Check if the Left directional button is pressed
     virtual bool keyLeftPressed();
@@ -89,13 +106,14 @@ public:
 
 private:
     bool virtualKeyPressed(VirtualKeyIndex virtualKeyIndex);
+    #if defined(__ANDROID__)
     float m_moveObj;
+    #endif
     is::GameDisplay *m_scene;
 
     sf::Sprite m_sprJoystick[2];
     sf::RectangleShape m_recJoystickMask[2];
     sf::RectangleShape m_recKeyLeftMask, m_recKeyRightMask, m_recKeyUpMask, m_recKeyDownMask, m_recKeyAMask, m_recKeyBMask;
-    sf::RectangleShape m_recLeft, m_recRight;
 };
 };
 

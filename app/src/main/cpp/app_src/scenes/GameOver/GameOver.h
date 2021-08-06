@@ -13,7 +13,7 @@
 class GameOver : public is::GameDisplay
 {
 public:
-    GameOver(sf::RenderWindow &window, sf::View &view, sf::RenderTexture &surface, is::GameSystemExtended& gameSystemExtended);
+    GameOver(is::GameSystemExtended& gameSystemExtended);
     void loadResources();
 
     //////////////////////////////////////////////////////
@@ -31,10 +31,6 @@ public:
     // responsible for displaying the objects of the scene
     // for us.
     //////////////////////////////////////////////////////
-
-private:
-    sf::Texture m_texPad;
-    sf::Font m_fontTitle;
 };
 
 #endif // GAMEOVER_H_INCLUDED

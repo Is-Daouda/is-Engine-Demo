@@ -1,12 +1,10 @@
 #include "Player.h"
 
-Player::Player(sf::Texture &texPlayer, sf::Texture &texFire, bool &timeUp, is::GameDisplay *scene):
+Player::Player(bool &timeUp, is::GameDisplay *scene):
     MainObject(),
-    Visibility(),
     Health(1, 2),
     GroundDetection(),
     m_scene(scene),
-    m_texFire(texFire),
     m_timeUp(timeUp),
     m_vAcc(0.f),
     HSP_ACC(0.15f),
@@ -39,7 +37,7 @@ Player::Player(sf::Texture &texPlayer, sf::Texture &texFire, bool &timeUp, is::G
     m_xOffset = 12.f;
     m_yOffset = 24.f;
     m_isActive = true;
-    is::createSprite(texPlayer, m_sprParent, sf::IntRect(0, 0, 24, 48), sf::Vector2f(m_x, m_y), sf::Vector2f(m_xOffset, m_yOffset));
+    is::createSprite(m_scene->GRMgetTexture("player"), m_sprParent, sf::IntRect(0, 0, 24, 48), sf::Vector2f(m_x, m_y), sf::Vector2f(m_xOffset, m_yOffset));
 }
 
 void Player::step(float const &DELTA_TIME)
@@ -79,10 +77,10 @@ void Player::step(float const &DELTA_TIME)
                 if (m_timeStarInvicibility != 0)
                 {
                     auto msc = m_scene->GSMgetMusic("starman");
-                    if (is::getSFMLSndState(msc, sf::Sound::Playing))
+                    if (is::checkSFMLSndState(msc, is::SFMLSndStatus::Playing))
                     {
                         msc->stop();
-                        m_scene->GSMplayMusic("world_1");
+                        m_scene->GSMplayMusic(!gameCtrl->getPlayWarningSnd() ? "world_1" : "world_1_hurry_up");
                     }
                 }
             }
@@ -124,8 +122,7 @@ void Player::step(float const &DELTA_TIME)
                         m_scene->GSMplaySound("fireball"); // We play this sound
 
                         // Add the object to the SDM container
-                        m_scene->SDMaddSceneObject(std::make_shared<FireBall>(m_texFire, getSpriteX() + (8.f * m_imageXscale),
-                                                                              getSpriteY() - 8.f, 8.f * m_imageXscale, m_scene));
+                        m_scene->SDMaddSceneObject(std::make_shared<FireBall>(getSpriteX() + (8.f * m_imageXscale), getSpriteY() - 8.f, 8.f * m_imageXscale, m_scene));
                     }
                     gameKey->m_keyBUsed = true;
                 }
@@ -291,7 +288,7 @@ void Player::step(float const &DELTA_TIME)
                 {
                     if (!m_playerIsKO)
                     {
-                        if (!is::getSFMLSndState(m_scene->GSMgetSound("mario_die"), sf::Sound::Playing))
+                        if (!is::checkSFMLSndState(m_scene->GSMgetSound("mario_die"), is::SFMLSndStatus::Playing))
                             m_playerIsKO = true;
                     }
                 }
@@ -364,7 +361,7 @@ float Player::getHspAcc() const
     return HSP_ACC;
 }
 
-void Player::draw(sf::RenderTexture &surface)
+void Player::draw(is::Render &surface)
 {
     if (m_visible)
     {
@@ -415,6 +412,23 @@ void Player::makeJump(float vspLim, bool &_keyState)
 
 void Player::playerHurt(bool canContinue)
 {
+    auto playerLoose = [this]()
+    {
+        if (getIsActive())
+        {
+            m_time = 0.f;
+            m_scene->GSMplaySound("mario_die"); // We play this sound
+            m_scene->GSMstopMusic("world_1"); // We stop this sound
+            m_scene->GSMstopMusic("world_1_hurry_up"); // We stop this sound
+            m_scene->GSMstopMusic("underground"); // We stop this sound
+            m_scene->GSMstopMusic("starman"); // We stop this sound
+            m_scene->getGameSystem().useVibrate(60);
+            if (m_scene->getGameSystem().m_currentLives > 0) m_scene->getGameSystem().m_currentLives--;
+            setHealth(0);
+            setIsActive(false);
+        }
+    };
+
     if (canContinue)
     {
         m_haveFireBall = false;
@@ -428,32 +442,7 @@ void Player::playerHurt(bool canContinue)
             m_timeFreezPlayer = is::SECOND;
             m_timePlayerInvicibility = 60;
         }
-        else
-        {
-            if (getIsActive())
-            {
-                m_time = 0.f;
-                m_scene->GSMplaySound("mario_die"); // We play this sound
-                m_scene->GSMgetMusic("world_1")->stop(); // We stop this sound
-                m_scene->GSMgetMusic("underground")->stop(); // We stop this sound
-                m_scene->getGameSystem().useVibrate(60);
-                setHealth(0);
-                setIsActive(false);
-            }
-        }
+        else playerLoose();
     }
-    else
-    {
-        if (getIsActive())
-        {
-            m_time = 0.f;
-            m_scene->GSMplaySound("mario_die"); // We play this sound
-            m_scene->GSMgetMusic("world_1")->stop(); // We stop this sound
-            m_scene->GSMgetMusic("underground")->stop(); // We stop this sound
-            m_scene->GSMgetMusic("starman")->stop(); // We stop this sound
-            m_scene->getGameSystem().useVibrate(60);
-            setHealth(0);
-            setIsActive(false);
-        }
-    }
+    else playerLoose();
 }

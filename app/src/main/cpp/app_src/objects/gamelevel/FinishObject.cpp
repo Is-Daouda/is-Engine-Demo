@@ -1,6 +1,6 @@
 #include "FinishObject.h"
 
-FinishObject::FinishObject(sf::Texture &tex, float x, float y, is::GameDisplay *scene):
+FinishObject::FinishObject(float x, float y, is::GameDisplay *scene):
     MainObject(x, y),
     Step(0),
     m_scene(scene),
@@ -8,10 +8,10 @@ FinishObject::FinishObject(sf::Texture &tex, float x, float y, is::GameDisplay *
 {
     m_strName = "FinishObject";
     setRectangleMask(32, 32);
-    is::createSprite(tex, m_sprCastleFlag, sf::IntRect(160, 224, 32, 32), sf::Vector2f(m_x + 224.f, m_y + 170.f), sf::Vector2f(0.f, 0.f));
-    is::createSprite(tex, m_sprCastle, sf::IntRect(0, 224, 160, 160), sf::Vector2f(m_x + 160.f, m_y + 160.f), sf::Vector2f(0.f, 0.f));
+    is::createSprite(m_scene->GRMgetTexture("tileset"), m_sprCastleFlag, sf::IntRect(160, 224, 32, 32), sf::Vector2f(m_x + 224.f, m_y + 170.f), sf::Vector2f(0.f, 0.f));
+    is::createSprite(m_scene->GRMgetTexture("tileset"), m_sprCastle, sf::IntRect(0, 224, 160, 160), sf::Vector2f(m_x + 160.f, m_y + 160.f), sf::Vector2f(0.f, 0.f));
     m_x += 13.f;
-    is::createSprite(tex, m_sprParent, sf::IntRect(160, 256, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(0.f, 0.f));
+    is::createSprite(m_scene->GRMgetTexture("tileset"), m_sprParent, sf::IntRect(160, 256, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(0.f, 0.f));
 }
 
 void FinishObject::step(float const &DELTA_TIME)
@@ -29,11 +29,11 @@ void FinishObject::step(float const &DELTA_TIME)
                 if (is::isBetween(player->getY(), m_yStart + 32.f, m_yStart + 96.f))        type = Effect::SCORE_2000;
                 else if (is::isBetween(player->getY(), m_yStart + 96.f, m_yStart + 160.f))  type = Effect::SCORE_800;
                 else if (is::isBetween(player->getY(), m_yStart + 160.f, m_yStart + 480.f)) type = Effect::SCORE_100;
-                m_scene->SDMaddSceneObject(std::make_shared<Effect>(gameCtrl->m_texEffect, type,
-                                                                    player->getSpriteX(), player->getSpriteY(), m_scene));
+                m_scene->SDMaddSceneObject(std::make_shared<Effect>(type, player->getSpriteX(), player->getSpriteY(), m_scene));
                 m_scene->GSMplaySound("flagpole"); // We play this sound
-                m_scene->GSMgetMusic("world_1")->stop();
-                m_scene->GSMgetMusic("starman")->stop();
+                m_scene->GSMstopMusic("world_1");
+                m_scene->GSMstopMusic("world_1_hurry_up");
+                m_scene->GSMstopMusic("starman");
                 static_cast<is::GameKeyData*>(m_scene->SDMgetObject("GameKeyData"))->m_disableAllKey = true; // deactivate commands
                 player->setHsp(0.f);
                 player->setVspAcc(0.f);
@@ -102,8 +102,8 @@ void FinishObject::step(float const &DELTA_TIME)
                     else
                     {
                         gameCtrl->m_gameTime.setTimeValue(0, 0, 0);
-                        m_scene->GSMgetSound("score_count")->stop();
-                        if (!is::getSFMLSndState(m_scene->GSMgetSound("stage_clear"), sf::Sound::Playing)) addStep();
+                        m_scene->GSMstopSound("score_count");
+                        if (!is::checkSFMLSndState(m_scene->GSMgetSound("stage_clear"), is::SFMLSndStatus::Playing)) addStep();
                     }
                 }
             break;
@@ -123,7 +123,7 @@ void FinishObject::step(float const &DELTA_TIME)
     }
 }
 
-void FinishObject::draw(sf::RenderTexture &surface)
+void FinishObject::draw(is::Render &surface)
 {
     // We draw the object only if it is in the field of vision of the scene view
     if (m_scene->inViewRec(this))

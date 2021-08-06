@@ -1,13 +1,13 @@
 #include "CancelButton.h"
 
-CancelButton::CancelButton(sf::Texture &tex, is::GameDisplay *scene) :
+CancelButton::CancelButton(is::GameDisplay *scene) :
     MainObject(-999, -999),
     m_scene(scene)
 {
     m_strName = "CancelButton";
     m_depth = -9;
     m_imageAlpha = 250;
-    is::createSprite(tex, m_sprParent, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("tools_pad"), m_sprParent, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
 
 }
 
@@ -25,7 +25,7 @@ bool CancelButton::isOn() const
     return (m_imageAlpha > 250);
 }
 
-void CancelButton::draw(sf::RenderTexture &surface)
+void CancelButton::draw(is::Render &surface)
 {
     if (m_visible)
     {

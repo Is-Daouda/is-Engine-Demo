@@ -5,7 +5,7 @@
 #include "../../../isEngine/system/entity/parents/Visibilty.h"
 #include "../../../isEngine/system/entity/parents/Type.h"
 
-class Block : public is::MainObject, public is::Visibility, public is::Type
+class Block : public is::MainObject, public is::Type
 {
 public:
     static float m_globalframe; // allows to standardize the animation of the blocks
@@ -22,10 +22,10 @@ public:
         BLOCK_MUSHROOM_1UP
     };
 
-    Block(sf::Texture *tex, BlockType type, float x, float y, is::GameDisplay *scene, float frame = 0.f);
+    Block(BlockType type, float x, float y, is::GameDisplay *scene, float frame = 0.f);
 
     void step(float const& DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    //void draw(is::Render &surface);
     void setCreateBonus(bool val) {m_createBonus = val;}
     void reduceCoins()
     {

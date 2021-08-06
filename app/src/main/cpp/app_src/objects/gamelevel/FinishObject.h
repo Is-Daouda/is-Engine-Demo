@@ -17,10 +17,10 @@
 class FinishObject : public is::MainObject, public is::Step
 {
 public:
-    FinishObject(sf::Texture &tex, float x, float y, is::GameDisplay *scene);
+    FinishObject(float x, float y, is::GameDisplay *scene);
 
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
 
 private:
     is::GameDisplay *m_scene;

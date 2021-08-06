@@ -19,10 +19,10 @@ public:
         PIRANA_PLANT
     };
 
-    Enemy(sf::Texture &tex, EnemyType type, float x, float y, is::GameDisplay *scene);
+    Enemy(EnemyType type, float x, float y, is::GameDisplay *scene);
 
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    //void draw(is::Render &surface);
     void setIsBeated(bool val) {m_isBeated = val;}
     bool getIsBeated() const {return m_isBeated;}
 

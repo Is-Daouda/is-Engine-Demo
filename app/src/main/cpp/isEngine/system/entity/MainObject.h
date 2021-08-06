@@ -1,3 +1,24 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #ifndef MAINOBJECT_H_INCLUDED
 #define MAINOBJECT_H_INCLUDED
 
@@ -9,8 +30,9 @@
 #include "../function/GameFunction.h"
 
 #if defined(IS_ENGINE_USE_SDM)
-#include "../entity/parents/Destructible.h"
-#include "../entity/parents/DepthObject.h"
+#include "parents/Destructible.h"
+#include "parents/DepthObject.h"
+#include "parents/Visibilty.h"
 #endif // defined
 
 namespace is
@@ -20,19 +42,24 @@ namespace is
 ////////////////////////////////////////////////////////////
 class MainObject : public Name
 #if defined(IS_ENGINE_USE_SDM)
-                 , public Destructible, public DepthObject
+                 , public Destructible, public DepthObject, public is::Visibility
 #endif // defined
 {
 public:
-    MainObject();
+    explicit MainObject();
     MainObject(float x, float y);
     MainObject(sf::Sprite &spr, float x = 0.f, float y = 0.f);
+    MainObject(sf::Texture &tex, float x, float y, bool center = false);
     virtual ~MainObject();
 
     /// Return the instance number
     static int instanceNumber;
 
     #if defined(IS_ENGINE_USE_SDM)
+    /// on SDL it allows to blit sprites.
+    /// Also prevents the object's sprite from being drawn outside the view (works on SDL and SFML).
+    std::string m_SDMblitSprTextureName = "";
+
     /// lets SDM know if it can call its Step method (update function)
     bool m_SDMcallStep = true;
 
@@ -53,7 +80,7 @@ public:
     {
         is::showLog("WARNING: MainObject event called in object <" + m_strName + ">! This method must be overloaded!");
     }
-    #endif // defined
+    #endif
 
     /// Set x initial position
     virtual void setXStart(float x);
@@ -128,7 +155,7 @@ public:
     virtual void setXYOffset();
 
     /// Set image scale
-    virtual void setImageScale(float x, float y);
+    virtual void setImageScaleX_Y(float x, float y);
 
     /// Set time
     virtual void setTime(float x);
@@ -170,10 +197,10 @@ public:
     virtual void updateSprite(float x, float y, float angle = 0.f, int alpha = 255, float xScale = 1.f, float yScale = 1.f, float xOffset = 0.f, float yOffset = 0.f);
 
     /// Draw the main sprite of object
-    virtual void draw(sf::RenderTexture &surface);
+    virtual void draw(is::Render &surface);
 
     /// Draw the collision mask
-    virtual void drawMask(sf::RenderTexture &surface, sf::Color color = sf::Color::Blue);
+    virtual void drawMask(is::Render &surface, sf::Color color = sf::Color::Blue);
 
     /// Return the rectangle (default) mask
     virtual const Rectangle& getMask() const noexcept {return m_aabb;}
@@ -265,6 +292,12 @@ public:
     /// Return y of main sprite
     virtual float getSpriteY() const;
 
+    /// Return the sprite texture width
+    virtual int getTextureWidth() const;
+
+    /// Return the sprite texture height
+    virtual int getTextureHeight() const;
+
     /// Return the ID of object (instance number)
     virtual int getInstanceId() const;
 
@@ -292,14 +325,20 @@ public:
     /// Return the y center of main sprite
     virtual int getSpriteCenterY() const;
 
+    /// Return the number of sub-images according to the width of the sprite
+    virtual int getSpriteNumberSubImage(int subImageWidth) const;
+
     /// Return the active value
     virtual bool getIsActive() const;
 
     /// Test collision in comparison with another
-    virtual bool placeMetting(int x, int y, MainObject const *other);
+    bool placeMetting(int x, int y, MainObject const *other);
 
     /// Test collision in comparison with another
-    virtual bool placeMetting(int x, int y, std::shared_ptr<MainObject> const &other);
+    bool placeMetting(int x, int y, std::shared_ptr<MainObject> const &other);
+
+    /// Test if object is in view rectangle (vision)
+    bool inViewRec(sf::View const &view, bool useTexRec = true);
 
     /// Return the sprite of object
     virtual sf::Sprite& getSprite();
@@ -309,8 +348,11 @@ protected:
     /// Set frame limit
     virtual void setFrameLimit(float frameStart, float frameEnd = -1.f);
 
-    /// sub function of placeMeting method
+    /// Sub function of placeMeting method
     bool placeMettingSubFunction(float x, float y, MainObject const *other) const;
+
+    /// Allows to update sprite when step function is disabled
+    void updateSDMsprite();
 
     float m_x, m_y, m_xStart, m_yStart, m_xPrevious, m_yPrevious;
     float m_speed, m_hsp, m_vsp;
@@ -319,10 +361,11 @@ protected:
     float m_time;
     unsigned int m_w, m_h;
     int m_instanceId, m_imageAlpha, m_imageIndex;
-    bool m_isActive;
+    bool m_isActive, m_isSDMSprite;
 
     /// Allows to draw collision mask
     bool m_drawMask;
+    bool m_centerSpr = false;
     is::Rectangle m_aabb;
     is::Circle m_circle;
     sf::Sprite m_sprParent;
@@ -337,9 +380,27 @@ bool instanceExist(std::shared_ptr<T> const &obj)
 
 /// Check if instance exists
 template<class T>
+bool instanceExist(std::unique_ptr<T> const &obj)
+{
+    return (obj.get() != nullptr);
+}
+
+/// Check if instance exists
+template<class T>
 bool instanceExist(T const *obj)
 {
     return (obj != nullptr);
+}
+
+/// destroye instance
+template<class T>
+void instanceDestroy(T *obj)
+{
+    if (is::instanceExist(obj))
+    {
+        delete obj;
+        obj = 0;
+    }
 }
 
 /// Functor for compare the x position of objects
@@ -352,7 +413,17 @@ public:
         float xB = ((is::instanceExist(b)) ? b->getX() : 0.f);
         return (xA < xB);
     }
+    bool operator()(MainObject const *a, MainObject const *b) const
+    {
+        float xA = ((is::instanceExist(a)) ? a->getX() : 0.f);
+        float xB = ((is::instanceExist(b)) ? b->getX() : 0.f);
+        return (xA < xB);
+    }
 };
+bool operator<(const MainObject *a, const MainObject &b);
+bool operator<(const MainObject &b, const MainObject *a);
+bool operator<(std::shared_ptr<MainObject> const &a, const MainObject &b);
+bool operator<(const MainObject &b, std::shared_ptr<MainObject> const &a);
 
 /// Sort object array by x position
 template<class T>
@@ -381,9 +452,6 @@ void sortObjArrayByDepth(std::list<std::shared_ptr<T>> &v)
     v.sort(is::CompareDepth());
 }
 #endif // defined
-
-bool operator<(std::shared_ptr<MainObject> const &a, const MainObject &b);
-bool operator<(const MainObject &b, std::shared_ptr<MainObject> const &a);
 }
 
 #endif // MAINOBJECT_H_INCLUDED

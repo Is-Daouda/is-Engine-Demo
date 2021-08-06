@@ -6,7 +6,6 @@ set(
 	${ISENGINE_SRC_DIR}/app_src/gamesystem_ext/GameSystemExtended.cpp
 
 	# game scene
-
 	${ISENGINE_SRC_DIR}/app_src/scenes/GameIntro/GameIntro.cpp
 	${ISENGINE_SRC_DIR}/app_src/scenes/GameLevel/GameLevel.cpp
 	${ISENGINE_SRC_DIR}/app_src/scenes/GameLevel/GameLevelLoadResource.cpp
@@ -23,10 +22,9 @@ set(
 	${ISENGINE_SRC_DIR}/app_src/objects/gamelevel/FireBall.cpp
 	${ISENGINE_SRC_DIR}/app_src/objects/gamelevel/GameController.cpp
 	${ISENGINE_SRC_DIR}/app_src/objects/gamelevel/HUD.cpp
-	${ISENGINE_SRC_DIR}/app_src/objects/gamelevel/LevelTile.cpp
 	${ISENGINE_SRC_DIR}/app_src/objects/gamelevel/Player.cpp
 	${ISENGINE_SRC_DIR}/app_src/objects/gamelevel/SpecialObject.cpp
-
+	
 	# game intro objects
 	${ISENGINE_SRC_DIR}/app_src/objects/gameintro/GameIntroController.cpp
 	
@@ -35,7 +33,7 @@ set(
 	
 	# game over objects
 	${ISENGINE_SRC_DIR}/app_src/objects/gameover/GameOverController.cpp
-	
+
 	# widgets
 	${ISENGINE_SRC_DIR}/app_src/objects/widgets/CancelButton.cpp
 	${ISENGINE_SRC_DIR}/app_src/objects/widgets/GameDialog.cpp

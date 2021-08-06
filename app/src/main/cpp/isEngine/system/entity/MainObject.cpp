@@ -1,3 +1,24 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #include "MainObject.h"
 
 namespace is
@@ -9,6 +30,7 @@ MainObject::MainObject():
     #if defined(IS_ENGINE_USE_SDM)
     Destructible(),
     DepthObject(DepthObject::NORMAL_DEPTH),
+    Visibility(),
     #endif // defined
     m_x(0.f),
     m_y(0.f),
@@ -34,6 +56,7 @@ MainObject::MainObject():
     m_imageAlpha(255),
     m_imageIndex(0),
     m_isActive(false),
+    m_isSDMSprite(false),
     m_drawMask(false)
 {
     updateCollisionMask();
@@ -46,6 +69,7 @@ MainObject::MainObject(float x, float y):
     #if defined(IS_ENGINE_USE_SDM)
     Destructible(),
     DepthObject(DepthObject::NORMAL_DEPTH),
+    Visibility(),
     #endif // defined
     m_x(x),
     m_y(y),
@@ -71,6 +95,7 @@ MainObject::MainObject(float x, float y):
     m_imageAlpha(255),
     m_imageIndex(0),
     m_isActive(false),
+    m_isSDMSprite(false),
     m_drawMask(false)
 {
     updateCollisionMask();
@@ -83,6 +108,7 @@ MainObject::MainObject(sf::Sprite &spr, float x, float y):
     #if defined(IS_ENGINE_USE_SDM)
     Destructible(),
     DepthObject(DepthObject::NORMAL_DEPTH),
+    Visibility(),
     #endif // defined
     m_x((static_cast<int>(x) == 0) ? x : spr.getPosition().x),
     m_y((static_cast<int>(y) == 0) ? y : spr.getPosition().y),
@@ -108,10 +134,68 @@ MainObject::MainObject(sf::Sprite &spr, float x, float y):
     m_imageAlpha(255),
     m_imageIndex(0),
     m_isActive(false),
+    m_isSDMSprite(true),
     m_drawMask(false),
     m_sprParent(spr)
 {
+    #if defined(IS_ENGINE_USE_SDM)
+    m_SDMcallStep = false;
+    m_SDMcallEvent = false;
+    #endif // defined
+    setRectangleMask(spr.getTexture()->getSize().x, spr.getTexture()->getSize().y);
     updateCollisionMask();
+    updateSprite();
+    instanceNumber++;
+    m_instanceId = instanceNumber;
+}
+
+MainObject::MainObject(sf::Texture &tex, float x, float y, bool center):
+    Name(),
+    #if defined(IS_ENGINE_USE_SDM)
+    Destructible(),
+    DepthObject(DepthObject::NORMAL_DEPTH),
+    #endif // defined
+    m_x(x),
+    m_y(y),
+    m_xStart(m_x),
+    m_yStart(m_y),
+    m_xPrevious(m_x),
+    m_yPrevious(m_y),
+    m_speed(0.f),
+    m_hsp(0.f),
+    m_vsp(0.f),
+    m_frameStart(0.f),
+    m_frameEnd(0.f),
+    m_frame(0.f),
+    m_imageXscale(1.f),
+    m_imageYscale(1.f),
+    m_imageScale(1.f),
+    m_imageAngle(0.f),
+    m_xOffset(0.f),
+    m_yOffset(0.f),
+    m_time(0.f),
+    m_w(32),
+    m_h(32),
+    m_imageAlpha(255),
+    m_imageIndex(0),
+    m_isActive(false),
+    m_isSDMSprite(true),
+    m_drawMask(false)
+{
+    m_centerSpr = center;
+    #if defined(IS_ENGINE_USE_SDM)
+    m_SDMcallStep = false;
+    m_SDMcallEvent = false;
+    #endif // defined
+    setRectangleMask(tex.getSize().x, tex.getSize().y);
+    is::createSprite(tex, m_sprParent, sf::Vector2f(m_x, m_y), sf::Vector2f(0.f, 0.f));
+    if (!m_centerSpr) updateCollisionMask();
+    else
+    {
+        is::centerSFMLObj(m_sprParent);
+        centerCollisionMask(m_x, m_y);
+    }
+    updateSprite();
     instanceNumber++;
     m_instanceId = instanceNumber;
 }
@@ -127,6 +211,7 @@ void MainObject::setPosition(float x, float y)
     m_yPrevious = m_y;
     m_x = x;
     m_y = y;
+    updateSDMsprite();
 }
 
 void MainObject::setSpriteScale(float x, float y)
@@ -162,26 +247,22 @@ void MainObject::setStartPosition(float x, float y)
 
 void MainObject::setX(float x)
 {
-    m_xPrevious = m_x;
-    m_x = x;
+    setPosition(x, m_y);
 }
 
 void MainObject::setY(float y)
 {
-    m_yPrevious = m_y;
-    m_y = y;
+    setPosition(m_x, y);
 }
 
 void MainObject::moveX(float x)
 {
-    m_xPrevious = m_x;
-    m_x += x;
+    setPosition(m_x + x, m_y);
 }
 
 void MainObject::moveY(float y)
 {
-    m_yPrevious = m_y;
-    m_y += y;
+    setPosition(m_x, m_y + y);
 }
 
 void MainObject::setSpeed(float val)
@@ -203,6 +284,7 @@ void MainObject::setAngularMove(float const &DELTA_TIME, float speed, float angl
 {
     m_x += (is::lengthDirX(speed, angle) * is::VALUE_CONVERSION) * DELTA_TIME;
     m_y -= (is::lengthDirY(speed, angle) * is::VALUE_CONVERSION) * DELTA_TIME;
+    updateSDMsprite();
 }
 
 void MainObject::setFrame(float val)
@@ -212,50 +294,53 @@ void MainObject::setFrame(float val)
 
 void MainObject::setImageXscale(float val)
 {
-    m_imageXscale = val;
+    setImageScaleX_Y(val, m_imageYscale);
 }
 
 void MainObject::setImageYscale(float val)
 {
-    m_imageYscale = val;
+    setImageScaleX_Y(m_imageXscale, val);
 }
 
 void MainObject::setImageScale(float val)
 {
     m_imageScale = val;
+    setImageScaleX_Y(m_imageScale, m_imageScale);
 }
 
 void MainObject::setImageAngle(float val)
 {
     m_imageAngle = val;
+    updateSDMsprite();
 }
 
 void MainObject::setXOffset(float val)
 {
-    m_xOffset = val;
+    setXYOffset(val, m_xOffset);
 }
 
 void MainObject::setYOffset(float val)
 {
-    m_yOffset = val;
+    setXYOffset(m_xOffset, val);
 }
 
 void MainObject::setXYOffset(float x, float y)
 {
     m_xOffset = x;
     m_yOffset = y;
+    updateSDMsprite();
 }
 
 void MainObject::setXYOffset()
 {
-    m_xOffset = is::getSFMLObjOriginX(m_sprParent);
-    m_yOffset = is::getSFMLObjOriginY(m_sprParent);
+    setXYOffset(is::getSFMLObjOriginX(m_sprParent), is::getSFMLObjOriginY(m_sprParent));
 }
 
-void MainObject::setImageScale(float x, float y)
+void MainObject::setImageScaleX_Y(float x, float y)
 {
     m_imageXscale = x;
     m_imageYscale = y;
+    updateSDMsprite();
 }
 
 void MainObject::setTime(float x)
@@ -266,6 +351,7 @@ void MainObject::setTime(float x)
 void MainObject::setImageAlpha(int val)
 {
     m_imageAlpha = val;
+    updateSDMsprite();
 }
 
 void MainObject::setImageIndex(int val)
@@ -356,34 +442,41 @@ void MainObject::updateSprite(float x, float y, float angle, int alpha, float xS
     is::setSFMLObjX_Y(m_sprParent, x + xOffset, y + yOffset);
 }
 
-void MainObject::draw(sf::RenderTexture &surface)
+void MainObject::draw(is::Render &surface)
 {
-    updateSprite();
-    surface.draw(m_sprParent);
+    is::draw(surface, m_sprParent);
     if (m_drawMask) drawMask(surface);
 }
 
-void MainObject::drawMask(sf::RenderTexture &surface, sf::Color color)
+void MainObject::drawMask(is::Render &surface, sf::Color color)
 {
     // We draw the AABB (rectangle, square) mask only if it has dimensions
     if (m_w > 0 && m_h > 0)
     {
-        sf::RectangleShape rec({static_cast<float>(m_w), static_cast<float>(m_h)});
+        sf::RectangleShape rec(sf::Vector2f(static_cast<float>(m_w), static_cast<float>(m_h)));
+        #if defined(IS_ENGINE_SFML)
         rec.setOutlineThickness(1.f);
         rec.setFillColor(sf::Color::Transparent);
         rec.setOutlineColor(color);
-        rec.setPosition({static_cast<float>(m_aabb.m_left), static_cast<float>(m_aabb.m_top)});
-        surface.draw(rec);
+        #else
+        rec.setColor(sf::Color::Red);
+        #endif
+        is::setSFMLObjX_Y(rec, static_cast<float>(m_aabb.m_left), static_cast<float>(m_aabb.m_top));
+        is::draw(surface, rec);
     }
     else if (m_circle.m_raduis > 0.f) // We draw the circle mask only if it has dimensions
     {
         sf::CircleShape circle(m_circle.m_raduis);
+        #if defined(IS_ENGINE_SFML)
         circle.setOutlineThickness(1.f);
         circle.setFillColor(sf::Color::Transparent);
-        is::centerSFMLObj(circle);
         circle.setOutlineColor(color);
-        circle.setPosition({m_circle.m_x, m_circle.m_y});
-        surface.draw(circle);
+        #else
+        circle.setColor(sf::Color::Red);
+        #endif
+        is::centerSFMLObj(circle);
+        is::setSFMLObjX_Y(circle, m_circle.m_x, m_circle.m_y);
+        is::draw(surface, circle);
     }
 }
 
@@ -583,6 +676,16 @@ float MainObject::getSpriteY() const
     return m_sprParent.getPosition().y;
 }
 
+int MainObject::getTextureWidth() const
+{
+    return is::getSFMLTextureWidth(m_sprParent.getTexture());
+}
+
+int MainObject::getTextureHeight() const
+{
+    return is::getSFMLTextureHeight(m_sprParent.getTexture());
+}
+
 int MainObject::getSpriteCenterX() const
 {
     return (m_sprParent.getTextureRect().width / 2);
@@ -591,6 +694,11 @@ int MainObject::getSpriteCenterX() const
 int MainObject::getSpriteCenterY() const
 {
     return (m_sprParent.getTextureRect().height / 2);
+}
+
+int MainObject::getSpriteNumberSubImage(int subImageWidth) const
+{
+    return (m_sprParent.getTexture()->getSize().x / subImageWidth);
 }
 
 bool MainObject::placeMettingSubFunction(float x, float y, MainObject const *other) const
@@ -632,6 +740,15 @@ bool MainObject::placeMettingSubFunction(float x, float y, MainObject const *oth
     return false;
 }
 
+void MainObject::updateSDMsprite()
+{
+    if (m_isSDMSprite)
+    {
+        if (m_centerSpr) centerCollisionMask(m_x, m_y); else updateCollisionMask();
+        updateSprite();
+    }
+}
+
 bool MainObject::placeMetting(int x, int y, MainObject const *other)
 {
     return placeMettingSubFunction(x, y, other);
@@ -642,9 +759,43 @@ bool MainObject::placeMetting(int x, int y, std::shared_ptr<MainObject> const &o
     return placeMettingSubFunction(x, y, other.get());
 }
 
+bool MainObject::inViewRec(sf::View const &view, bool useTexRec)
+{
+    is::Rectangle testRec;
+    if (useTexRec)
+    {
+        testRec.m_left   = m_x;
+        testRec.m_top    = m_y;
+        testRec.m_right  = m_x + ((m_sprParent.getGlobalBounds().width  < 1) ? 32 : m_sprParent.getGlobalBounds().width);
+        testRec.m_bottom = m_y + ((m_sprParent.getGlobalBounds().height < 1) ? 32 : m_sprParent.getGlobalBounds().height);
+    }
+    else testRec = this->getMask();
+
+    is::Rectangle viewRec;
+    viewRec.m_left   = view.getCenter().x - (view.getSize().x / 2.f);
+    viewRec.m_right  = view.getCenter().x + (view.getSize().x / 2.f);
+    viewRec.m_top    = view.getCenter().y - (view.getSize().y / 2.f);
+    viewRec.m_bottom = view.getCenter().y + (view.getSize().y / 2.f);
+
+    if (is::collisionTest(testRec, viewRec)) return true;
+    return false;
+}
+
 sf::Sprite& MainObject::getSprite()
 {
     return m_sprParent;
+}
+
+bool operator<(const MainObject *a, const MainObject &b)
+{
+    if (is::instanceExist(a)) return a->getX()  < (b.getX() - 460.f);
+    else return false;
+}
+
+bool operator<(const MainObject &b, const MainObject *a)
+{
+    if (is::instanceExist(a)) return (b.getX() + 460.f) < a->getX();
+    else return false;
 }
 
 bool operator<(std::shared_ptr<MainObject> const &a, const MainObject &b)

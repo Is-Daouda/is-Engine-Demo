@@ -10,7 +10,7 @@
 class GameMenu : public is::GameDisplay
 {
 public:
-    GameMenu(sf::RenderWindow &window, sf::View &view, sf::RenderTexture &surface, is::GameSystemExtended &gameSysExt);
+    GameMenu(is::GameSystemExtended &gameSysExt);
 
     void loadResources();
     void SDMmanageSceneEvents();
@@ -31,10 +31,6 @@ public:
     // responsible for displaying the objects of the scene
     // for us.
     //////////////////////////////////////////////////////
-
-private:
-    sf::Texture m_texPad, m_texPad2, m_texToolsPad, m_texScreenBG;
-    sf::Texture m_texGamePad;
 };
 
 #endif // GAMEMENU_H_INCLUDED

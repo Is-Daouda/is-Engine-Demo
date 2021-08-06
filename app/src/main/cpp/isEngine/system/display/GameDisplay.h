@@ -1,3 +1,24 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #ifndef GAMEDISPLAY_H_INCLUDED
 #define GAMEDISPLAY_H_INCLUDED
 
@@ -6,99 +27,39 @@
 
 #if defined(IS_ENGINE_USE_SDM)
 #include "SDM.h"
-
+#else
+#include "../entity/MainObject.h"
 #endif // defined
-#if defined(IS_ENGINE_USE_GSM)
+
 #include "../sound/GSM.h"
-#endif // defined
-
-#if defined(__ANDROID__)
-#if defined(IS_ENGINE_USE_ADMOB)
-#include "../android/AdmobManager.h"
-#endif
-#endif // defined
+#include "../graphic/GRM.h"
 
 namespace is
 {
+class GameDisplay;
+sf::Vector2f getMapPixelToCoords(GameDisplay const *scene, sf::Vector2i pixelPos);
+
 //////////////////////////////////////////////////////
 /// \brief Class for manage game scene
 ///
 //////////////////////////////////////////////////////
-class GameDisplay;
-
-sf::Vector2f getMapPixelToCoords(GameDisplay const *scene, sf::Vector2i pixelPos);
-
 class GameDisplay
-#if defined(IS_ENGINE_USE_SDM) && defined(IS_ENGINE_USE_GSM)
-    : public SDM, public GSM
+#if defined(IS_ENGINE_USE_SDM)
+    : public SDM, public GSM, public GRM
 #else
-    #if defined(IS_ENGINE_USE_SDM)
-    : public SDM
-    #endif // defined
-    #if defined(IS_ENGINE_USE_GSM)
-    : public GSM
-    #endif // defined
+    : public GSM, public GRM
 #endif // defined
-
 {
 public:
     bool m_isClose;
 
-    GameDisplay(sf::RenderWindow &window, sf::View &view, sf::RenderTexture &surface, GameSystemExtended &gameSysExt, sf::Color bgColor);
+    /*  					/!\ WARNING! /!\
+     * This constructor is no longer supported in this version of the engine. Use the one below.
+     *
+     * GameDisplay(sf::RenderWindow &window, sf::View &view, is::Render &surface, GameSystemExtended &gameSysExt, sf::Color bgColor);
+     */
+    GameDisplay(GameSystemExtended &gameSysExt, sf::Color bgColor);
     virtual ~GameDisplay();
-
-#if defined(__ANDROID__)
-#if defined(IS_ENGINE_USE_ADMOB)
-    virtual void setAdmob(AdmobManager *admob)
-    {
-        m_admobManager = admob;
-    }
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Display the reward video ads (run only when the request is successful)
-    ///
-    /// \return 1 if the reward video has been read correctly 0 if not
-    ////////////////////////////////////////////////////////////
-    virtual int rewardVideoStep()
-    {
-        int result(0);
-        if (checkAdState(firebase::admob::rewarded_video::LoadAdLastResult()))
-        {
-            bool stopGameTread(true);
-            firebase::admob::rewarded_video::Show(m_admobManager->m_activity->clazz);
-            showTempLoading();
-
-            if (checkAdState(firebase::admob::rewarded_video::ShowLastResult()))
-            {
-                while (stopGameTread)
-                {
-                    float dTime = getDeltaTime();
-                    if (firebase::admob::rewarded_video::presentation_state() ==
-                        firebase::admob::rewarded_video::kPresentationStateHidden)
-                        stopGameTread = false;
-                    sf::Event ev;
-                    while (m_window.pollEvent(ev))
-                    {
-                        if (ev.type == sf::Event::Closed)
-                        {
-                            m_window.close();
-                            std::terminate();
-                        }
-                    }
-                    m_window.clear(sf::Color::Black);
-                    m_window.display();
-                }
-
-                // End of video
-                result = 1;
-                m_admobManager->checkAdRewardObjReinitialize();
-            }
-        }
-        else m_admobManager->loadRewardVideo();
-        return result;
-    }
-#endif // defined
-#endif // defined
 
     ////////////////////////////////////////////////////////////
     /// \brief Update scene behavior
@@ -137,7 +98,7 @@ public:
     virtual void drawScreen();
 
     /// Draw temporal loading (simulation)
-    virtual void showTempLoading(float time = 3.f * 59.f);
+    virtual void showTempLoading(float time = 3.f * is::SECOND);
 
     /// Allows to change an option by playing a sound and making an animation
     virtual void setOptionIndex(int optionIndexValue, bool callWhenClick, float buttonScale = 1.3f);
@@ -172,11 +133,17 @@ public:
     /// Set view x and y variable
     virtual void setViewVarXY(float x, float y);
 
+    /// Set view size
+    virtual void setViewSize(sf::Vector2f v);
+
+    /// Set view size
+    virtual void setViewSize(float x, float y);
+
     /// Set window size
     virtual void setWindowSize(sf::Vector2u v, bool updateViewSize = false);
 
     /// Set window title
-    virtual void setWindowTitle(const sf::String &title);
+    virtual void setWindowTitle(const std::string &title);
 
     /// Set background color
     virtual void setWindowBgColor(sf::Color color);
@@ -193,6 +160,9 @@ public:
     /// Set is playing
     virtual void setIsPlaying(bool val);
 
+    /// Allows access to another scene. If no scene is entered the application stops.
+    virtual void quitScene(int nextScene = -1);
+
     /// Set scene start
     virtual void setSceneStart(bool val);
 
@@ -205,7 +175,7 @@ public:
     /// Check if scene is running
     virtual bool getIsRunning() const;
 
-    /// Return isPlaying
+    /// Return m_isPlaying
     virtual bool getIsPlaying() const {return m_isPlaying;}
 
     /// Return scene start
@@ -221,22 +191,22 @@ public:
     virtual bool getKeyBackPressed() const {return m_keyBackPressed;}
 
     /// Return scene view
-    virtual sf::View& getView() const {return m_view;}
+    virtual const sf::View& getView() const noexcept {return m_view;}
 
     /// Return render window
     virtual sf::RenderWindow& getRenderWindow() const {return m_window;}
 
     /// Return render texture
-    virtual sf::RenderTexture& getRenderTexture() const {return m_surface;}
+    virtual is::Render& getRenderTexture() const {return m_surface;}
 
     /// Return game system controller
     virtual GameSystemExtended& getGameSystem() {return m_gameSysExt;}
 
     /// Return font system
-    virtual sf::Font& getFontSystem() {return m_fontSystem;}
+    virtual sf::Font& getFontSystem() {return GRMgetFont("font_system");}
 
     /// Return font msg
-    virtual sf::Font& getFontMsg() {return m_fontMsg;}
+    virtual sf::Font& getFontMsg() {return GRMgetFont("font_msg");}
 
     /// Return Button Select sprite
     virtual sf::Sprite& getSprButtonSelect() {return m_sprButtonSelect;}
@@ -254,7 +224,7 @@ public:
     virtual unsigned int getSceneHeight() const {return m_sceneHeight;}
 
     /// Return vibrate time duration
-    virtual short getVibrateTimeDuration() const {return m_vibrateTimeDuration;}
+    virtual short getVibrateTimeDuration() const {return m_timeVibrateDuration;}
 
     /// Return the delta time elapsed independent of the main rendering loop
     virtual float getDeltaTime();
@@ -277,6 +247,13 @@ public:
     /// Return view H
     virtual float getViewH() const {return m_viewH;}
 
+    /// Return Cursor Position
+    virtual sf::Vector2f getCursor(
+                                    #if defined(__ANDROID__)
+                                    unsigned int finger = 0
+                                    #endif // defined
+                                   ) const;
+
     /// Return the scene background color
     virtual sf::Color& getBgColor() {return m_windowBgColor;}
 
@@ -297,26 +274,11 @@ public:
                         #endif // defined
                         )
     {
-        // A rectangle that will allow to test with the SFML object
-        sf::RectangleShape cursor(sf::Vector2f(3.f, 3.f));
-        is::centerSFMLObj(cursor);
-
-        #if defined(__ANDROID__)
-        sf::Vector2i pixelPos = sf::Touch::getPosition(finger, m_window);
-        #else
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
-        #endif // defined
-
-        sf::Vector2f worldPos = getMapPixelToCoords(this, pixelPos);
-        float dx = pointDistance(m_viewX, m_viewY, worldPos.x, m_viewY);
-        float dy = pointDistance(m_viewX, m_viewY, m_viewX, worldPos.y);
-
-        if (worldPos.x < m_viewX) dx *= -1;
-        if (worldPos.y < m_viewY) dy *= -1;
-
-        is::setSFMLObjX_Y(cursor, m_viewX + dx, m_viewY + dy);
-        if (obj.getGlobalBounds().intersects(cursor.getGlobalBounds())) return true;
-        else return false;
+        return is::mouseCollision(m_window, obj
+#if defined(__ANDROID__)
+                                  , finger
+#endif
+                                  );
     }
 
     //////////////////////////////////////////////////////
@@ -324,38 +286,21 @@ public:
     /// scene with the mouse cursor on PC platform / touch on mobile
     ///
     /// \param obj SFML object with which we want to test
-    /// \param cursor Allows to get the position of the collision point
+    /// \param position Allows to get the position of the collision point
     /// \param finger Finger index (on Android)
     //////////////////////////////////////////////////////
     template <class T>
-    bool mouseCollision(T const &obj, sf::RectangleShape &cursor
+    bool mouseCollision(T const &obj, sf::Vector2f &position
                         #if defined(__ANDROID__)
                         , unsigned int finger = 0
                         #endif // defined
                         )
     {
-        // A rectangle that will allow to test with the SFML object
-        // If size is empty set default value
-        if (static_cast<int>(is::getSFMLObjWidth(cursor)) == 0 && static_cast<int>(is::getSFMLObjHeight(cursor)) == 0)
-            is::setSFMLObjSize(cursor, sf::Vector2f(3.f, 3.f));
-        is::centerSFMLObj(cursor);
-
-        #if defined(__ANDROID__)
-        sf::Vector2i pixelPos = sf::Touch::getPosition(finger, m_window);
-        #else
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
-        #endif // defined
-
-        sf::Vector2f worldPos = getMapPixelToCoords(this, pixelPos);
-        float dx = pointDistance(m_viewX, m_viewY, worldPos.x, m_viewY);
-        float dy = pointDistance(m_viewX, m_viewY, m_viewX, worldPos.y);
-
-        if (worldPos.x < m_viewX) dx *= -1;
-        if (worldPos.y < m_viewY) dy *= -1;
-
-        is::setSFMLObjX_Y(cursor, m_viewX + dx, m_viewY + dy);
-        if (obj.getGlobalBounds().intersects(cursor.getGlobalBounds())) return true;
-        else return false;
+        return is::mouseCollision(m_window, obj, position
+#if defined(__ANDROID__)
+                                 , finger
+#endif
+                                 );
     }
 
     #if defined(IS_ENGINE_USE_SDM)
@@ -372,7 +317,7 @@ public:
             controlEventFocusClosing(event);
             if (event.type == sf::Event::KeyReleased)
             {
-                if (event.key.code == is::GameConfig::KEY_CANCEL)
+                if (m_gameSysExt.keyIsPressed(is::GameConfig::KEY_CANCEL))
                 {
                     if (!m_showMsg) showMessageBox(is::lang::msg_quit_game[m_gameSysExt.m_gameLanguage]);
                     else m_keyBackPressed = true;
@@ -405,25 +350,33 @@ public:
 
     /// Method to draw scene objects
     virtual void SDMdraw();
+
+    /// Allows to create a sprite by associating a texture to it.
+    /// It is also used to blit sprites but only works with SDL.
+    virtual void createSprite(std::string const &spriteName, is::MainObject &obj, sf::IntRect rec, sf::Vector2f position, sf::Vector2f origin, sf::Vector2f scale = sf::Vector2f(1.f, 1.f), unsigned int alpha = 255);
     #endif // defined
 
-    #if defined(IS_ENGINE_USE_GSM)
     /// Allows to play sound in container by his name
-    virtual void GSMplaySound(std::string name);
+    virtual void GSMplaySound(const std::string& name);
 
     /// Allows to pause sound in container by his name
-    virtual void GSMpauseSound(std::string name);
+    virtual void GSMpauseSound(const std::string& name);
+
+    /// Allows to stop sound in container by his name
+    virtual void GSMstopSound(const std::string& name);
 
     /// Allows to play music in container by his name
-    virtual void GSMplayMusic(std::string name);
+    virtual void GSMplayMusic(const std::string& name);
 
     /// Allows to pause music in container by his name
-    virtual void GSMpauseMusic(std::string name);
-    #endif // defined
+    virtual void GSMpauseMusic(const std::string& name);
+
+    /// Allows to stop music in container by his name
+    virtual void GSMstopMusic(const std::string& name);
 
     /// Show message box according to type
-    template<class T>
-    void showMessageBox(T const &msgBody, bool mbYesNo = true)
+    template<class T1>
+    void showMessageBox(T1 const &msgBody, bool mbYesNo = true)
     {
         m_showMsg = true;
         m_mbYesNo = mbYesNo;
@@ -434,36 +387,36 @@ public:
         m_txtMsgBoxNo.setString(is::lang::pad_answer_no[m_gameSysExt.m_gameLanguage]);
         m_txtMsgBoxOK.setString(is::lang::pad_answer_ok[m_gameSysExt.m_gameLanguage]);
 
-        is::centerSFMLObj(m_txtMsgBoxYes);
-        is::centerSFMLObj(m_txtMsgBoxNo);
-        is::centerSFMLObj(m_txtMsgBoxOK);
-
-        is::setSFMLObjX_Y(m_recMsgBox, sf::Vector2f(m_view.getCenter().x, m_view.getCenter().y));
-        is::setSFMLObjX_Y(m_sprMsgBox, sf::Vector2f(m_view.getCenter().x, m_view.getCenter().y));
+        centerSFMLObj(m_txtMsgBoxYes);
+        centerSFMLObj(m_txtMsgBoxNo);
+        centerSFMLObj(m_txtMsgBoxOK);
+        setView();
+        setSFMLObjX_Y(m_recMsgBox, sf::Vector2f(m_view.getCenter().x, m_view.getCenter().y));
+        setSFMLObjX_Y(m_sprMsgBox, sf::Vector2f(m_view.getCenter().x, m_view.getCenter().y));
         const float dim(6.f),
                     boxXOrigin(is::getSFMLObjOriginX(m_sprMsgBox)),
                     boxYOrigin(is::getSFMLObjOriginY(m_sprMsgBox));
-        is::setSFMLObjX_Y(m_sprMsgBoxButton1,
+        setSFMLObjX_Y(m_sprMsgBoxButton1,
                           is::getSFMLObjX(m_sprMsgBox) - boxXOrigin + is::getSFMLObjOriginX(m_sprMsgBoxButton1) + dim,
                           is::getSFMLObjY(m_sprMsgBox) + boxYOrigin - is::getSFMLObjHeight(m_sprMsgBoxButton1) + dim);
-        is::setSFMLObjX_Y(m_sprMsgBoxButton2,
+        setSFMLObjX_Y(m_sprMsgBoxButton2,
                           is::getSFMLObjX(m_sprMsgBox) + boxXOrigin - is::getSFMLObjOriginX(m_sprMsgBoxButton2) - dim,
                           is::getSFMLObjY(m_sprMsgBox) + boxYOrigin - is::getSFMLObjHeight(m_sprMsgBoxButton2) + dim);
-        is::setSFMLObjX_Y(m_sprMsgBoxButton3,
+        setSFMLObjX_Y(m_sprMsgBoxButton3,
                           is::getSFMLObjX(m_sprMsgBox),
                           is::getSFMLObjY(m_sprMsgBox) + boxYOrigin - is::getSFMLObjHeight(m_sprMsgBoxButton1) + dim);
-        is::setSFMLObjX_Y(m_txtMsgBox,
+        setSFMLObjX_Y(m_txtMsgBox,
                           is::getSFMLObjX(m_sprMsgBox)- boxXOrigin + 16.f,
                           is::getSFMLObjY(m_sprMsgBox) - boxYOrigin + 8.f);
         m_txtMsgBox.setString(msgBody);
 
         // Adjust the text on button
         float const adjustVal(8.f);
-        is::setSFMLObjX_Y(m_txtMsgBoxYes, is::getSFMLObjX(m_sprMsgBoxButton1),
+        setSFMLObjX_Y(m_txtMsgBoxYes, is::getSFMLObjX(m_sprMsgBoxButton1),
                           is::getSFMLObjY(m_sprMsgBoxButton1) - adjustVal);
-        is::setSFMLObjX_Y(m_txtMsgBoxNo, is::getSFMLObjX(m_sprMsgBoxButton2),
+        setSFMLObjX_Y(m_txtMsgBoxNo, is::getSFMLObjX(m_sprMsgBoxButton2),
                           is::getSFMLObjY(m_sprMsgBoxButton2) - adjustVal);
-        is::setSFMLObjX_Y(m_txtMsgBoxOK, is::getSFMLObjX(m_sprMsgBoxButton3),
+        setSFMLObjX_Y(m_txtMsgBoxOK, is::getSFMLObjX(m_sprMsgBoxButton3),
                           is::getSFMLObjY(m_sprMsgBoxButton3) - adjustVal);
 
         is::setSFMLObjAlpha(m_sprMsgBoxButton1, m_msgWaitTime);
@@ -474,8 +427,6 @@ public:
         is::setSFMLObjAlpha2(m_txtMsgBoxYes, m_msgWaitTime);
         is::setSFMLObjAlpha2(m_txtMsgBoxOK, m_msgWaitTime);
         is::setSFMLObjAlpha2(m_txtMsgBox, m_msgWaitTime);
-
-        setView();
     }
 
     /// Allows to manage focus and closing events
@@ -491,27 +442,27 @@ protected:
     };
 
     /// Update message box components
-    void updateMsgBox(float const &DELTA_TIME, sf::Color textDefaultColor = is::GameConfig::DEFAULT_MSG_BOX_TEXT_COLOR,
+    void updateMsgBox(int sliderDirection = 0, bool rightSideValidation = false,
+                      sf::Color textDefaultColor = is::GameConfig::DEFAULT_MSG_BOX_TEXT_COLOR,
                       sf::Color selectedTextColor = is::GameConfig::DEFAULT_MSG_BOX_SELECTED_TEXT_COLOR);
 
     /// Update time wait
-    void updateTimeWait(float const &DELTA_TIME);
+    void updateTimeWait();
 
     /// Show message box
     void drawMsgBox();
 
     sf::RenderWindow &m_window;
-    sf::View &m_view;
+    sf::View m_view;
 
-    sf::RenderTexture &m_surface;
+    is::Render &m_surface;
     GameSystemExtended &m_gameSysExt;
 
-    sf::Font m_fontSystem, m_fontMsg;
     sf::Sprite m_sprButtonSelect;
     sf::Clock m_clock;
     sf::Color m_windowBgColor;
 
-    short const m_vibrateTimeDuration; ///< Represent the time of vibration (ms)
+    short const m_timeVibrateDuration; ///< Represent the time of vibration (ms)
 
     int m_optionIndex;
     int m_waitTime, m_msgWaitTime;
@@ -526,16 +477,10 @@ protected:
     bool m_keyBackPressed;
     bool m_showMsg, m_mbYesNo, m_msgBoxMouseInCollison;
 
-    sf::Texture m_texMsgBox, m_texMsgButton;
     sf::Sprite m_sprMsgBox, m_sprMsgBoxButton1, m_sprMsgBoxButton2, m_sprMsgBoxButton3;
+    sf::Sprite m_sprLoading;
     sf::Text m_txtMsgBox, m_txtMsgBoxYes, m_txtMsgBoxNo, m_txtMsgBoxOK;
-    sf::RectangleShape m_recMsgBox, m_recCursor;
-
-#if defined(__ANDROID__)
-#if defined(IS_ENGINE_USE_ADMOB)
-    AdmobManager *m_admobManager;
-#endif // defined
-#endif // defined
+    sf::RectangleShape m_recMsgBox;
 };
 }
 

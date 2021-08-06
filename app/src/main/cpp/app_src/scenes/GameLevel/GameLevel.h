@@ -13,7 +13,7 @@
 #include "../../objects/gamelevel/Enemy.h"
 #include "../../objects/gamelevel/FireBall.h"
 #include "../../objects/gamelevel/FinishObject.h"
-#include "../../objects/gamelevel/LevelTile.h"
+#include "../../objects/gamelevel/Tiles.h"
 #include "../../objects/gamelevel/SpecialObject.h"
 #include "../../objects/gamelevel/StartTransition.h"
 #include "../../objects/widgets/CancelButton.h"
@@ -29,7 +29,7 @@
 class GameLevel : public is::GameDisplay
 {
 public:
-    GameLevel(sf::RenderWindow &window, sf::View &swooshView, sf::RenderTexture &surface, is::GameSystemExtended &gameSysExt);
+    GameLevel(is::GameSystemExtended &gameSysExt);
 
     void SDMmanageSceneEvents();
     void SDMmanageSceneMsgAnswers();
@@ -52,11 +52,6 @@ public:
     //////////////////////////////////////////////////////
 
 private:
-    sf::Texture m_texPad, m_texToolsPad;
-    sf::Texture m_texPlayer, m_texFire, m_texEffect, m_texEnemy, m_texBonus, m_texTile;
-    sf::Texture m_texIcoMenuBtn;
-    sf::Texture m_texDialog, m_texJoystick;
-
     int const CURRENT_LEVEL;
 };
 

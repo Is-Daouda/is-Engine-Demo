@@ -67,8 +67,9 @@ void SpecialObject::step(float const &DELTA_TIME)
                         m_scene->setViewVarXY(320, 720.f);
                         m_scene->setWindowBgColor(sf::Color::Black); // change scene background color
                         m_scene->SDMsetObjDepth(player, -1.f); // reset the initial depth
+                        m_scene->GSMstopMusic("world_1");
+                        m_scene->GSMstopMusic("world_1_hurry_up");
                         m_scene->GSMplayMusic("underground");
-                        m_scene->GSMgetMusic("world_1")->stop();
                         gameKey->m_disableAllKey = false;
                         m_destroy = true; // destroy object
                     }
@@ -104,8 +105,8 @@ void SpecialObject::step(float const &DELTA_TIME)
                             m_scene->setViewVarXY(obj->getX(), 240.f);
                             m_scene->setWindowBgColor(sf::Color(36, 146, 255)); // change scene background color
                             m_scene->GSMplaySound("pipe");
-                            m_scene->GSMplayMusic("world_1");
-                            m_scene->GSMgetMusic("underground")->stop();
+                            m_scene->GSMstopMusic("underground");
+                            m_scene->GSMplayMusic((!gameCtrl->getPlayWarningSnd()) ? "world_1" : "world_1_hurry_up");
                         }
                     }
                     else

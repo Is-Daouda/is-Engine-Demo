@@ -13,7 +13,7 @@ public:
     /// Return the instance number
     static int instanceNumber;
 
-    FireBall(sf::Texture &tex, float x, float y, float hSpeed, is::GameDisplay *scene);
+    FireBall(float x, float y, float hSpeed, is::GameDisplay *scene);
     ~FireBall() {instanceNumber--;}
 
     void step(float const &DELTA_TIME);

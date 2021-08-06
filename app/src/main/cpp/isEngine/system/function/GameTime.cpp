@@ -1,3 +1,24 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #include "GameTime.h"
 
 namespace is
@@ -33,9 +54,9 @@ GameTime::~GameTime()
 {
 }
 
-void GameTime::step(float const &DELTA_TIME, float const &VALUE_CONVERSION, float const &VALUE_TIME)
+void GameTime::step(float const &DELTA_TIME)
 {
-    if (m_mSecond > 0) m_mSecond -= static_cast<int>((VALUE_CONVERSION * VALUE_TIME) * DELTA_TIME);
+    if (m_mSecond > 0) m_mSecond -= static_cast<int>((is::VALUE_CONVERSION * is::VALUE_TIME) * DELTA_TIME);
     else
     {
         if (m_second == 0)
@@ -116,10 +137,10 @@ unsigned int GameTime::getMSecond() const
 
 bool GameTime::compareTime(unsigned int m, unsigned int s, unsigned int ms) const
 {
-    return (((m * 3600) + (s * 60) + ms) > getTimeValue());
+    return (((m * 3600) + (s * 60) + ms) >= getTimeValue());
 }
 
-std::string GameTime::getTimeString() const
+const std::string GameTime::getTimeString() const noexcept
 {
     std::string str;
     str = writeZero(m_minute) + ":" + writeZero(m_second) + "." + writeZero(m_mSecond);

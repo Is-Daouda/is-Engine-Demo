@@ -1,9 +1,7 @@
 #include "GameController.h"
 
-GameController::GameController(int const &CURRENT_LEVEL, sf::Texture &texBonus, sf::Texture &texEffect, is::GameDisplay *scene):
-    m_texEffect(texEffect),
+GameController::GameController(int const &CURRENT_LEVEL, is::GameDisplay *scene):
     m_scene(scene),
-    m_texBonus(texBonus),
     CURRENT_LEVEL(CURRENT_LEVEL),
     m_countLevelTime(false),
     m_launchTransition(true),
@@ -29,33 +27,43 @@ void GameController::step(float const &DELTA_TIME)
     // if the player is KO we stop the level
     if (player->getIsKO())
     {
-        m_scene->getGameSystem().m_launchOption = is::DisplayOption::RESTART_LEVEL; // restart level
+        // restart level if the player has enough health
+        if (m_scene->getGameSystem().m_currentLives > 0) m_scene->getGameSystem().m_launchOption = is::DisplayOption::RESTART_LEVEL;
+        else m_scene->getGameSystem().m_launchOption = is::DisplayOption::GAME_OVER;
         m_scene->setSceneEnd(true);
     }
 
     // the check point is activated when player reaches the required position
-    if (player->getX() > m_x) m_scene->getGameSystem().m_checkPoint = true;
+    if (player->getX() > m_x && !m_scene->getSceneEnd()) m_scene->getGameSystem().m_checkPoint = true;
 
     // when player finish the level
     if (!m_scene->getSceneEnd())
     {
-        if (auto finishObject = static_cast<FinishObject*>(m_scene->SDMgetObject("FinishObject")); finishObject->getStep() == 5)
+        if (auto finishObject = static_cast<FinishObject*>(m_scene->SDMgetObject("FinishObject")); finishObject != nullptr)
         {
-            //////////////////////////////////////////////////////////////////////
-            m_scene->getGameSystem().m_currentLevel++; // allow to access the next level
-
-            // increase game progress
-            if (m_scene->getGameSystem().m_currentLevel > m_scene->getGameSystem().m_gameProgression &&
-                m_scene->getGameSystem().m_gameProgression < m_scene->getGameSystem().m_levelNumber)
+            if (finishObject->getStep() == 5)
             {
-                m_scene->getGameSystem().m_gameProgression++;
-            }
-            m_scene->getGameSystem().saveData(is::GameConfig::GAME_DATA_FILE); // save data
-            //////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////
+                m_scene->getGameSystem().m_currentLevel++; // allow to access the next level
+                m_scene->getGameSystem().m_checkPoint = false;
 
-            m_scene->getGameSystem().m_launchOption = is::DisplayOption::NEXT_LEVEL; // go to the next level
-            m_scene->setSceneEnd(true);
-            finishObject->addStep();
+                // increase game progress
+                if (m_scene->getGameSystem().m_currentLevel > m_scene->getGameSystem().m_gameProgression &&
+                    m_scene->getGameSystem().m_gameProgression < m_scene->getGameSystem().m_levelNumber)
+                {
+                    m_scene->getGameSystem().m_gameProgression++;
+                }
+                m_scene->getGameSystem().saveData(is::GameConfig::GAME_DATA_FILE); // save data
+                //////////////////////////////////////////////////////////////////////
+
+                // Normally we go to the next level. But as there is only one level for the
+                // moment so we go to the game over scene.
+                // the NEXT_LEVEL enum allows to go to another level but on condition that
+                // this level is implemented in GameLevel loadResources() function towards line 80.
+                m_scene->getGameSystem().m_launchOption = is::DisplayOption::GAME_END_SCREEN; // go to the game over scene
+                m_scene->setSceneEnd(true);
+                finishObject->addStep();
+            }
         }
     }
 
@@ -100,19 +108,31 @@ void GameController::step(float const &DELTA_TIME)
         {
             if (m_gameTime.getTimeValue() != 0)
             {
-                if (m_gameTime.compareTime(0, 30, 0) && !m_playWarningSnd)
+                if (!m_playWarningSnd)
                 {
-                    m_scene->GSMplaySound("warning");
-                    m_scene->GSMgetMusic("world_1")->setPitch(1.25f); // speed up music
-                    m_playWarningSnd = true;
+                    if (m_gameTime.compareTime(0, 30, 0))
+                    {
+                        m_scene->GSMplaySound("warning");
+                        m_scene->GSMstopMusic("world_1");
+                        m_playWarningSnd = true;
+                    }
+                }
+                else
+                {
+                    if (is::checkSFMLSndState(m_scene->GSMgetSound("warning"), is::SFMLSndStatus::Stopped) &&
+                        is::checkSFMLSndState(m_scene->GSMgetMusic("world_1_hurry_up"), is::SFMLSndStatus::Stopped) &&
+                        is::checkSFMLSndState(m_scene->GSMgetMusic("underground"), is::SFMLSndStatus::Stopped) &&
+                        is::checkSFMLSndState(m_scene->GSMgetMusic("starman"), is::SFMLSndStatus::Stopped) &&
+                        player->getIsActive())
+                        m_scene->GSMplayMusic("world_1_hurry_up");
                 }
 
                 // level global time
-                m_gameTime.step(DELTA_TIME, is::VALUE_CONVERSION, is::VALUE_TIME);
+                m_gameTime.step(DELTA_TIME);
             }
             else m_timeUp = true;
         }
-        pauseGame();
+        if (!gameDialog->showDialog()) pauseGame();
 
         // block update and collision test
         blockCollision(DELTA_TIME);
@@ -263,27 +283,27 @@ void GameController::blockCollision(float const &DELTA_TIME)
                                             case Block::BLOCK_COIN:
                                                 sndName = "coin";
                                                 addBonus();
-                                                m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect, Effect::COIN_FLY, _X + 4.f, _Y - 16.f, m_scene));
+                                                m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::COIN_FLY, _X + 4.f, _Y - 16.f, m_scene));
                                             break;
                                             case Block::BLOCK_MULTI_COIN:
                                                 sndName = "coin";
                                                 addBonus();
                                                 currentBlock->reduceCoins();
-                                                m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect, Effect::COIN_FLY, _X + 4.f, _Y - 16.f, m_scene));
+                                                m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::COIN_FLY, _X + 4.f, _Y - 16.f, m_scene));
                                             break;
                                             case Block::BLOCK_MUSHROOM:
                                                 if (player->getHealth() == 1)
                                                 {
-                                                    m_scene->SDMaddSceneObject(std::make_shared<Bonus>(m_texBonus, Bonus::MUSHROOM, _X, _Y, m_scene));
+                                                    m_scene->SDMaddSceneObject(std::make_shared<Bonus>(Bonus::MUSHROOM, _X, _Y, m_scene));
                                                 }
-                                                else m_scene->SDMaddSceneObject(std::make_shared<Bonus>(m_texBonus, Bonus::FIRE_FLOWER, _X, _Y, m_scene));
+                                                else m_scene->SDMaddSceneObject(std::make_shared<Bonus>(Bonus::FIRE_FLOWER, _X, _Y, m_scene));
                                             break;
                                             case Block::BLOCK_MUSHROOM_1UP:
-                                                m_scene->SDMaddSceneObject(std::make_shared<Bonus>(m_texBonus, Bonus::MUSHROOM_1UP, _X, _Y, m_scene));
+                                                m_scene->SDMaddSceneObject(std::make_shared<Bonus>(Bonus::MUSHROOM_1UP, _X, _Y, m_scene));
                                                 currentBlock->setVisible(true);
                                             break;
                                             case Block::BLOCK_STARMAN:
-                                                m_scene->SDMaddSceneObject(std::make_shared<Bonus>(m_texBonus, Bonus::STARMAN, _X, _Y, m_scene));
+                                                m_scene->SDMaddSceneObject(std::make_shared<Bonus>(Bonus::STARMAN, _X, _Y, m_scene));
                                             break;
                                         }
                                         m_scene->GSMplaySound(sndName);
@@ -375,8 +395,7 @@ void GameController::blockCollision(float const &DELTA_TIME)
                                         // If Mario hits the block below and the enemy is above then he dies
                                         if (currentBlock->getYOffset() < 0.f && obj->placeMetting(0 , 2, currentBlock))
                                         {
-                                            m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect,
-                                                                                                 ((obj->getType() == Enemy::KOOPA_TROOPA) ? Effect::SCORE_200 : Effect::SCORE_100),
+                                            m_scene->SDMaddSceneObject(std::make_shared<Effect>(((obj->getType() == Enemy::KOOPA_TROOPA) ? Effect::SCORE_200 : Effect::SCORE_100),
                                                                                                   obj->getSpriteX(), obj->getY(), m_scene));
                                             obj->setIsBeated(true);
                                         }
@@ -419,10 +438,10 @@ void GameController::blockCollision(float const &DELTA_TIME)
                         m_scene->getGameSystem().m_currentScore += 50;
 
                         // create blocks debris
-                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect, Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 4.f, 4.f));
-                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect, Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 4.f, -4.f));
-                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect, Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 1.5f, 1.5f));
-                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(m_texEffect, Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 1.5f, -1.5f));
+                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 4.f, 4.f));
+                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 4.f, -4.f));
+                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 1.5f, 1.5f));
+                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::BLOCK_DEBRIS, _X, _Y, m_scene, 1.5f, -1.5f));
 
                         // Here the object is deleted manually because its update is not managed by the SDM
                         it->reset();
@@ -541,26 +560,28 @@ void GameController::stopSounds(bool val)
         }
         else
         {
-            if (is::getSFMLSndState(m_scene->GSMgetSound("mario_die"), sf::Sound::Paused))   m_scene->GSMplaySound("mario_die");
-            if (is::getSFMLSndState(m_scene->GSMgetSound("flagpole"), sf::Sound::Paused)) m_scene->GSMplaySound("flagpole");
-            if (is::getSFMLSndState(m_scene->GSMgetSound("warning"), sf::Sound::Paused)) m_scene->GSMplaySound("warning");
-            if (is::getSFMLSndState(m_scene->GSMgetSound("stage_clear"), sf::Sound::Paused)) m_scene->GSMplaySound("stage_clear");
-            if (is::getSFMLSndState(m_scene->GSMgetSound("score_count"), sf::Sound::Paused)) m_scene->GSMplaySound("score_count");
+            if (is::checkSFMLSndState(m_scene->GSMgetSound("mario_die"), is::SFMLSndStatus::Paused))   m_scene->GSMplaySound("mario_die");
+            if (is::checkSFMLSndState(m_scene->GSMgetSound("flagpole"), is::SFMLSndStatus::Paused)) m_scene->GSMplaySound("flagpole");
+            if (is::checkSFMLSndState(m_scene->GSMgetSound("warning"), is::SFMLSndStatus::Paused)) m_scene->GSMplaySound("warning");
+            if (is::checkSFMLSndState(m_scene->GSMgetSound("stage_clear"), is::SFMLSndStatus::Paused)) m_scene->GSMplaySound("stage_clear");
+            if (is::checkSFMLSndState(m_scene->GSMgetSound("score_count"), is::SFMLSndStatus::Paused)) m_scene->GSMplaySound("score_count");
         }
     }
     if (m_scene->getGameSystem().m_enableMusic)
     {
         if (val)
         {
-            if (is::getSFMLSndState(m_scene->GSMgetMusic("world_1"), sf::Sound::Playing)) m_scene->GSMpauseMusic("world_1");
-            if (is::getSFMLSndState(m_scene->GSMgetMusic("underground"), sf::Sound::Playing)) m_scene->GSMpauseMusic("underground");
-            if (is::getSFMLSndState(m_scene->GSMgetMusic("starman"), sf::Sound::Playing)) m_scene->GSMpauseMusic("starman");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("world_1"), is::SFMLSndStatus::Playing)) m_scene->GSMpauseMusic("world_1");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("world_1_hurry_up"), is::SFMLSndStatus::Playing)) m_scene->GSMpauseMusic("world_1_hurry_up");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("underground"), is::SFMLSndStatus::Playing)) m_scene->GSMpauseMusic("underground");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("starman"), is::SFMLSndStatus::Playing)) m_scene->GSMpauseMusic("starman");
         }
         else
         {
-            if (is::getSFMLSndState(m_scene->GSMgetMusic("world_1"), sf::Sound::Paused)) m_scene->GSMplayMusic("world_1");
-            if (is::getSFMLSndState(m_scene->GSMgetMusic("underground"), sf::Sound::Paused)) m_scene->GSMplayMusic("underground");
-            if (is::getSFMLSndState(m_scene->GSMgetMusic("starman"), sf::Sound::Paused)) m_scene->GSMplayMusic("starman");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("world_1"), is::SFMLSndStatus::Paused)) m_scene->GSMplayMusic("world_1");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("world_1_hurry_up"), is::SFMLSndStatus::Paused)) m_scene->GSMplayMusic("world_1_hurry_up");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("underground"), is::SFMLSndStatus::Paused)) m_scene->GSMplayMusic("underground");
+            if (is::checkSFMLSndState(m_scene->GSMgetMusic("starman"), is::SFMLSndStatus::Paused)) m_scene->GSMplayMusic("starman");
         }
     }
 }

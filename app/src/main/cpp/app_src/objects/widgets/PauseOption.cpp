@@ -1,6 +1,6 @@
 #include "PauseOption.h"
 
-PauseOption::PauseOption(is::GameDisplay *scene, sf::Texture &texIcon, sf::Texture &texPad):
+PauseOption::PauseOption(is::GameDisplay *scene):
     MainObject(),
     m_keyIsLocked(false),
     m_useMoveAnimation(true),
@@ -17,16 +17,16 @@ PauseOption::PauseOption(is::GameDisplay *scene, sf::Texture &texIcon, sf::Textu
         is::setSFMLObjSize(m_sprMask[i], sf::Vector2f(42.f, 42.f));
         is::centerSFMLObj(m_sprMask[i]);
     }
-    is::createSprite(texIcon, m_sprIcoSFX, sf::IntRect(0, 0, 48, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
-    is::createSprite(texIcon, m_sprParent, sf::IntRect(96, 0, 48, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
-    is::createSprite(texIcon, m_sprIcoVibrate, sf::IntRect(192, 0, 48, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("ico_button"), m_sprIcoSFX, sf::IntRect(0, 0, 48, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("ico_button"), m_sprParent, sf::IntRect(96, 0, 48, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("ico_button"), m_sprIcoVibrate, sf::IntRect(192, 0, 48, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
 
     // pause menu rectangle
     is::createRectangle(m_recPauseBG, sf::Vector2f(m_scene->getViewW() + 10, m_scene->getViewH() + 10.f), sf::Color(0, 0, 0, 100));
 
-    is::createSprite(texPad, m_sprPad1, sf::IntRect(0, 0, 160, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(80.f, 16.f));
-    is::createSprite(texPad, m_sprPad2, sf::IntRect(0, 0, 160, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(80.f, 16.f));
-    is::createSprite(texPad, m_sprPad3, sf::IntRect(0, 0, 160, 32), sf::Vector2f(0.f, 0.f) , sf::Vector2f(80.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_sprPad1, sf::IntRect(0, 0, 160, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(80.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_sprPad2, sf::IntRect(0, 0, 160, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(80.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_sprPad3, sf::IntRect(0, 0, 160, 32), sf::Vector2f(0.f, 0.f) , sf::Vector2f(80.f, 16.f));
 
     is::createText(m_scene->getFontSystem(), m_txtContinue, is::lang::pad_continue_game[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f, true);
     is::createText(m_scene->getFontSystem(), m_txtQuit, is::lang::pad_quit_game[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f, true);
@@ -182,7 +182,7 @@ void PauseOption::step(float const &DELTA_TIME)
     is::scaleAnimation(m_scene->getDELTA_TIME(), m_scene->getSprButtonSelectScale(), m_scene->getSprButtonSelect());
 }
 
-void PauseOption::draw(sf::RenderTexture &surface)
+void PauseOption::draw(is::Render &surface)
 {
     if (!m_scene->getIsPlaying() && m_scene->getSceneStart())
     {

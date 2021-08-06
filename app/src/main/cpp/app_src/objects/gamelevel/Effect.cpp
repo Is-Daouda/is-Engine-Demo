@@ -1,6 +1,6 @@
 #include "Effect.h"
 
-Effect::Effect(sf::Texture &tex, EffectType type, float x, float y, is::GameDisplay *scene, float speed, float Hspeed):
+Effect::Effect(EffectType type, float x, float y, is::GameDisplay *scene, float speed, float Hspeed):
     MainObject(x, y),
     Type(type),
     ScorePoint(),
@@ -12,7 +12,10 @@ Effect::Effect(sf::Texture &tex, EffectType type, float x, float y, is::GameDisp
     m_speed   = speed;
     m_hsp     = Hspeed;
 
-    is::createSprite(tex, m_sprParent, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+    // We create the sprite of the object.
+    // On SDL this sprite will be blit (Useful for drawing a group of different objects whose
+    // sprites have the same textures. This makes the game more optimized).
+    scene->createSprite("effect", *this, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
 
     // Score to add
     switch (m_type)
@@ -67,5 +70,6 @@ void Effect::step(float const &DELTA_TIME)
         }
         m_y += m_vsp * is::VALUE_CONVERSION * DELTA_TIME;
         is::setFrame(m_sprParent, m_frame, 4, 32);
+        updateSprite();
     }
 }

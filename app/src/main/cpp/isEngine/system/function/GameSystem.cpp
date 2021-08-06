@@ -1,15 +1,39 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #include "../function/GameSystem.h"
 
 namespace is
 {
-GameSystem::GameSystem()
+GameSystem::GameSystem(sf::RenderWindow &window):
+    m_window(window)
 {
+    m_gameLanguage = 0; // 0 = default language
     m_validationMouseKey    = GameConfig::KEY_VALIDATION_MOUSE;
     m_validationKeyboardKey = GameConfig::KEY_VALIDATION_KEYBOARD;
     m_disableKey = false;
     m_enableSound = true;
     m_enableMusic = true;
     m_enableVibrate = true;
+    m_loadParentResources = false;
     m_keyIsPressed = false;
 }
 
@@ -46,7 +70,7 @@ bool GameSystem::isPressed(
             else if (sf::Keyboard::isKeyPressed(m_validationKeyboardKey)) return true;
         break;
     }
-    #endif // defined
+    #endif
     return false;
 }
 
@@ -64,17 +88,23 @@ bool GameSystem::keyIsPressed(sf::Mouse::Button button) const
     return false;
 }
 
-bool GameSystem::fileExist(std::string const &fileName) const
+bool GameSystem::fileExist(std::string const &fileName)
 {
-    std::ifstream file(fileName.c_str());
-    return !file.fail();
+    return is::fileExist(fileName);
+}
+
+void GameSystem::removeFile(std::string const &fileName)
+{
+    remove(fileName.c_str());
+#if defined(IS_ENGINE_HTML_5)
+        EM_ASM(FS.syncfs(false, function(err){console.log(err)});, 0);
+#endif
 }
 
 void GameSystem::useVibrate(short ms)
 {
-    if (m_enableVibrate) is::vibrate(sf::milliseconds(ms));
+    if (m_enableVibrate) is::vibrate(ms);
 }
-
 
 void GameSystem::saveConfig(std::string const &fileName)
 {
@@ -89,6 +119,9 @@ void GameSystem::saveConfig(std::string const &fileName)
         fwrite(&m_gameLanguage, sizeof(int), 1, file);
         fwrite(&m_firstLaunch, sizeof(bool), 1, file);
         fclose(file);
+#if defined(IS_ENGINE_HTML_5)
+        EM_ASM(FS.syncfs(false, function(err){console.log(err)});, 0);
+#endif
     }
 }
 
@@ -122,6 +155,9 @@ void GameSystem::savePadConfig(std::string const &fileName)
         fwrite(&m_padAlpha, sizeof(int), 1, file);
         fwrite(&m_permutePadAB, sizeof(bool), 1, file);
         fclose(file);
+#if defined(IS_ENGINE_HTML_5)
+        EM_ASM(FS.syncfs(false, function(err){console.log(err)});, 0);
+#endif
     }
 }
 

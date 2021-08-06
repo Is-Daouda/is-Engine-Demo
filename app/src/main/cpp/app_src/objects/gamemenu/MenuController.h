@@ -29,10 +29,9 @@ public:
         OP_MENU_LANG
     };
 
-    MenuController(sf::Texture &texPad, sf::Texture &texPad2, sf::Texture &texToolsPad, sf::Texture &texScreenBG,
-                    sf::Texture &texGamePad, is::GameDisplay *scene);
+    MenuController(is::GameDisplay *scene);
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
 
 private:
     is::GameDisplay *m_scene;

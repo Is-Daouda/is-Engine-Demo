@@ -11,10 +11,10 @@
 #include "FireBall.h"
 #include "GroundDetection.h"
 
-class Player : public is::MainObject, public is::Visibility, public is::Health, public GroundDetection
+class Player : public is::MainObject, public is::Health, public GroundDetection
 {
 public:
-    Player(sf::Texture &texPlayer, sf::Texture &texFire, bool &timeUp, is::GameDisplay *scene);
+    Player(bool &timeUp, is::GameDisplay *scene);
 
     void step(float const &DELTA_TIME);
     void setIsKO(bool val);
@@ -36,7 +36,7 @@ public:
         m_health = 2;
     }
     void haveStarPower() {m_timeStarInvicibility = 18 * is::SECOND;}
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
 
     bool placeMetting(int x, int y, Block *other);
     bool getIsKO()             const;
@@ -52,7 +52,6 @@ public:
 
 private:
     is::GameDisplay *m_scene;
-    sf::Texture &m_texFire;
     bool &m_timeUp;
     float m_vAcc;
     float const HSP_ACC, HSP_MAX;

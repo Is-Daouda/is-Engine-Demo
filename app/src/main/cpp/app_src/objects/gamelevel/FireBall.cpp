@@ -2,7 +2,7 @@
 
 int FireBall::instanceNumber = 0;
 
-FireBall::FireBall(sf::Texture &tex, float x, float y, float hSpeed, is::GameDisplay *scene):
+FireBall::FireBall(float x, float y, float hSpeed, is::GameDisplay *scene):
     MainObject(x, y),
     m_scene(scene),
     m_createExplosion(false)
@@ -14,7 +14,11 @@ FireBall::FireBall(sf::Texture &tex, float x, float y, float hSpeed, is::GameDis
     m_xOffset = 16.f;
     m_yOffset = 16.f;
     setCircleMask(16.f);
-    is::createSprite(tex, m_sprParent, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+
+    // We create the sprite of the object.
+    // On SDL this sprite will be blit (Useful for drawing a group of different objects whose
+    // sprites have the same textures. This makes the game more optimized).
+    scene->createSprite("fire", *this, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
 }
 
 void FireBall::step(float const &DELTA_TIME)
@@ -48,6 +52,7 @@ void FireBall::step(float const &DELTA_TIME)
 
         // update sprite and collision mask
         is::setFrame(m_sprParent, m_frame, 4, 32);
+        updateSprite();
         centerCollisionMask(m_x + m_xOffset, m_y + m_yOffset);
     }
 }

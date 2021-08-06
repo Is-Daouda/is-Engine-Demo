@@ -103,24 +103,24 @@ static std::wstring game_over[] = {L"Game Over", L"Partie Terminée"};
 
 // ------------------------ game end ------------------------
 static std::wstring end_msg_congrat[] = {L"Congratulation", L"Félicitation"};
-static std::wstring end_msg_sentences[] = {L"\t\t\t\t  End of the Demo, Thanks for playing.\n"
+static std::wstring end_msg_sentences[] = {L"End of the Demo, Thanks for playing.\n"
                                             "\nYou want more levels?\n"
                                             "Well, we have some good news for you!\n"
-                                            "You have the possibility to add your own levels in the game thanks\n"
-                                            "to its level editor.\n"
+                                            "You have the possibility to add your own levels in the game\n"
+                                            "thanks to its level editor.\n"
                                             "Go ahead and let us discover your creativity!\n"
                                             "Make 35 years of Super Mario Bros unforgettable!\n"
                                             "We are counting on you!",
-                                                  L"\t\t\t\t  Fin de la Démo, Merci d’avoir joué.\n\n"
+                                                  L"Fin de la Démo.\n\n"
                                                    "Vous voulez plus de niveaux?\n"
                                                    "Et bien, nous avons une bonne nouvelle pour vous!\n"
-                                                   "Vous avez la possibilité d'ajouter vos propres niveaux dans le jeu\n"
-                                                   "grâce à son éditeur de niveau.\n"
+                                                   "Vous avez la possibilité d'ajouter vos propres niveaux dans\n"
+                                                   "le jeu grâce à son éditeur de niveau.\n"
                                                    "Lancez-vous et faite nous découvrir votre créativité!\n"
                                                    "Faite que ces 35 ans de Super Mario Bros soit inoubliable!\n"
                                                    "Nous comptons sur vous!"};
 
-static std::wstring end_msg_lvl_editor[] = {L"Click here to access the editor.", L"Cliquez ici pour avoir accès à l'éditeur."};
+static std::wstring end_msg_lvl_editor[] = {L"Click here to access the editor.", L"Cliquez ici (éditeur du jeu)."};
 }
 }
 

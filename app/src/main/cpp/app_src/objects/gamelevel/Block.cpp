@@ -2,23 +2,25 @@
 
 float Block::m_globalframe = 0.f;
 
-Block::Block(sf::Texture *tex, BlockType type, float x, float y, is::GameDisplay *scene, float frame):
+Block::Block(BlockType type, float x, float y, is::GameDisplay *scene, float frame):
     MainObject(x, y),
-    Visibility(type != BLOCK_MUSHROOM_1UP), // If it's a Block that gives the mushroom we make it invisible at the start
     Type(type),
     m_scene(scene),
     m_sprOrigin(16.f),
-    m_textureExiste((tex == 0) ? false : true),
+    m_textureExiste((m_type == BlockType::BLOCK_INVISIBLE) ? false : true),
     m_createBonus(false),
     m_countCoins(5) // Number of coins
 {
+    m_visible = (type != BLOCK_MUSHROOM_1UP), // If it's a Block that gives the mushroom we make it invisible at the start
     m_strName = "Block";
     m_isActive = true;
     m_frame = frame;
-    if (tex != nullptr)
+    if (m_textureExiste)
     {
-        is::createSprite(*tex, m_sprParent, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y),
-                        sf::Vector2f(0.f, 0.f), false, false);
+        // We create the sprite of the object.
+        // On SDL this sprite will be blit (Useful for drawing a group of different objects whose
+        // sprites have the same textures. This makes the game more optimized).
+        scene->createSprite("tileset", *this, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(0.f, 0.f));
     }
 
     // define collision mask
@@ -63,17 +65,5 @@ void Block::step(float const& DELTA_TIME)
         is::setFrame(m_sprParent, m_frame, 6, 32);
         updateSprite();
         updateCollisionMask();
-    }
-}
-
-void Block::draw(sf::RenderTexture &surface)
-{
-    // We draw the object only if it has a texture
-    if (m_textureExiste)
-    {
-        if (m_scene->inViewRec(this, true))
-        {
-            if (m_visible) surface.draw(m_sprParent);
-        }
     }
 }

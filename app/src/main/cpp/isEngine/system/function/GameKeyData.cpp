@@ -1,3 +1,24 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #include "GameKeyData.h"
 
 namespace is
@@ -19,7 +40,9 @@ GameKeyData::GameKeyData(is::GameDisplay *scene) :
     m_keyDownUsed(false),
     m_disableAllKey(false),
     m_hideGamePad(false),
+#if defined(__ANDROID__)
     m_moveObj(0.f),
+#endif
     m_scene(scene)
 {
     m_strName = "GameKeyData";
@@ -32,16 +55,12 @@ GameKeyData::GameKeyData(is::GameDisplay *scene) :
     m_keyboardRight    = is::GameConfig::KEY_RIGHT;
     m_keyboardUp       = is::GameConfig::KEY_UP;
     m_keyboardDown     = is::GameConfig::KEY_DOWN;
-
-    float const _SIZE(6.f);
-    is::setSFMLObjSize(m_recLeft, _SIZE, _SIZE);
-    is::setSFMLObjSize(m_recRight, _SIZE, _SIZE);
-    is::setSFMLObjFillColor(m_recRight, sf::Color::Red);
-    is::setSFMLObjFillColor(m_recLeft, sf::Color::Red);
+    loadResources();
 }
 
-void GameKeyData::loadResources(sf::Texture &tex)
+void GameKeyData::loadResources()
 {
+    auto &tex = m_scene->GRMaddTexture("game_pad", is::GameConfig::GUI_DIR + "game_pad.png");
     is::createSprite(tex, m_sprJoystick[0], sf::IntRect(0, 0, 134, 134), sf::Vector2f(0.f, 0.f), sf::Vector2f(67.f, 67.f));
     is::createSprite(tex, m_sprJoystick[1], sf::IntRect(134, ((!m_scene->getGameSystem().m_permutePadAB) ? 0 : 67), 144, 67),
                      sf::Vector2f(0.f, 0.f), sf::Vector2f(72.f, 37.f));
@@ -92,24 +111,36 @@ void GameKeyData::step(float const &DELTA_TIME)
         m_keyRightPressed = false;
         m_keyUpPressed = false;
         m_keyDownPressed = false;
+#if !defined(__ANDROID__)
+        m_moveKeyPressed = V_KEY_LEFT;
+#endif
     }
     else if (m_keyRightPressed)
     {
         m_keyLeftPressed = false;
         m_keyUpPressed = false;
         m_keyDownPressed = false;
+#if !defined(__ANDROID__)
+        m_moveKeyPressed = V_KEY_RIGHT;
+#endif
     }
     else if (m_keyUpPressed)
     {
         m_keyLeftPressed = false;
         m_keyRightPressed = false;
         m_keyDownPressed = false;
+#if !defined(__ANDROID__)
+        m_moveKeyPressed = V_KEY_UP;
+#endif
     }
     else if (m_keyDownPressed)
     {
         m_keyLeftPressed = false;
         m_keyRightPressed = false;
         m_keyUpPressed = false;
+#if !defined(__ANDROID__)
+        m_moveKeyPressed = V_KEY_DOWN;
+#endif
     }
 
 #if defined(__ANDROID__)
@@ -152,10 +183,15 @@ void GameKeyData::step(float const &DELTA_TIME)
         is::setSFMLObjX_Y(m_recJoystickMask[i], is::getSFMLObjX(m_sprJoystick[i]) + ((i == 0) ? moveMaskOnX : 0.f), is::getSFMLObjY(m_sprJoystick[i]));
         is::setSFMLObjAlpha(m_sprJoystick[i], m_scene->getGameSystem().m_padAlpha);
     }
+#else
+    if (m_keyAPressed) m_actionKeyPressed = V_KEY_A;
+    else if (m_keyBPressed) m_actionKeyPressed = V_KEY_B;
+    else m_actionKeyPressed = V_KEY_NONE;
+    if (!m_keyLeftPressed && !m_keyRightPressed && !m_keyUpPressed && !m_keyDownPressed) m_moveKeyPressed = V_KEY_NONE;
 #endif // defined
 }
 
-void GameKeyData::draw(sf::RenderTexture &surface)
+void GameKeyData::draw(is::Render &surface)
 {
     #if defined(__ANDROID__)
     if (m_moveObj < 320.f)
@@ -170,7 +206,6 @@ void GameKeyData::draw(sf::RenderTexture &surface)
         surface.draw(m_recKeyDownMask);
         surface.draw(m_recKeyAMask);
         surface.draw(m_recKeyBMask);
-        surface.draw(m_recRight);
          */
         for (int i(0); i < 2; i++)
         {
@@ -189,7 +224,7 @@ bool GameKeyData::keyLeftPressed()
     #if defined(__ANDROID__)
     if (virtualKeyPressed(V_KEY_LEFT)) return true;
     #else
-    if (sf::Keyboard::isKeyPressed(m_keyboardLeft)) return true;
+    if (m_scene->getGameSystem().keyIsPressed(m_keyboardLeft)) return true;
     #endif // defined
     //////////////////////////////////////////////////////////
     else return false;
@@ -204,7 +239,7 @@ bool GameKeyData::keyRightPressed()
     #if defined(__ANDROID__)
     if (virtualKeyPressed(V_KEY_RIGHT)) return true;
     #else
-    if (sf::Keyboard::isKeyPressed(m_keyboardRight)) return true;
+    if (m_scene->getGameSystem().keyIsPressed(m_keyboardRight)) return true;
     #endif // defined
     //////////////////////////////////////////////////////////
     else return false;
@@ -219,7 +254,7 @@ bool GameKeyData::keyUpPressed()
     #if defined(__ANDROID__)
     if (virtualKeyPressed(V_KEY_UP)) return true;
     #else
-    if (sf::Keyboard::isKeyPressed(m_keyboardUp)) return true;
+    if (m_scene->getGameSystem().keyIsPressed(m_keyboardUp)) return true;
     #endif // defined
     //////////////////////////////////////////////////////////
     else return false;
@@ -234,7 +269,7 @@ bool GameKeyData::keyDownPressed()
     #if defined(__ANDROID__)
     if (virtualKeyPressed(V_KEY_DOWN)) return true;
     #else
-    if (sf::Keyboard::isKeyPressed(m_keyboardDown)) return true;
+    if (m_scene->getGameSystem().keyIsPressed(m_keyboardDown)) return true;
     #endif // defined
     //////////////////////////////////////////////////////////
     else return false;
@@ -249,7 +284,7 @@ bool GameKeyData::keyAPressed()
     #if defined(__ANDROID__)
     if (virtualKeyPressed(V_KEY_A)) return true;
     #else
-    if (sf::Keyboard::isKeyPressed(m_keyboardA)) return true;
+    if (m_scene->getGameSystem().keyIsPressed(m_keyboardA)) return true;
     #endif // defined
     //////////////////////////////////////////////////////////
     else return false;
@@ -264,7 +299,7 @@ bool GameKeyData::keyBPressed()
     #if defined(__ANDROID__)
     if (virtualKeyPressed(V_KEY_B)) return true;
     #else
-    if (sf::Keyboard::isKeyPressed(m_keyboardB)) return true;
+    if (m_scene->getGameSystem().keyIsPressed(m_keyboardB)) return true;
     #endif // defined
     //////////////////////////////////////////////////////////
     else return false;
@@ -279,9 +314,9 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
     if (virtualKeyIndex == V_KEY_LEFT || virtualKeyIndex == V_KEY_RIGHT || virtualKeyIndex == V_KEY_UP || virtualKeyIndex == V_KEY_DOWN)
     {
         // check collision with left joystick
-        if (m_scene->mouseCollision(m_recJoystickMask[0], m_recLeft)
+        if (m_scene->mouseCollision(m_recJoystickMask[0])
             #if defined(__ANDROID__)
-            || m_scene->mouseCollision(m_recJoystickMask[0], m_recLeft, 1)
+            || m_scene->mouseCollision(m_recJoystickMask[0], 1)
             #endif // defined
             ) mouseOnLJoystick = true;
 
@@ -347,7 +382,7 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
                         )
                     {
                         m_moveKeyPressed = V_KEY_LEFT;
-                        is::showLog("L Pressed !");
+                        // is::showLog("L Pressed !");
                         return true;
                     }
                 break;
@@ -359,7 +394,7 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
                         )
                     {
                         m_moveKeyPressed = V_KEY_RIGHT;
-                        is::showLog("R Pressed !");
+                        // is::showLog("R Pressed !");
                         return true;
                     }
                 break;
@@ -371,7 +406,7 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
                         )
                     {
                         m_moveKeyPressed = V_KEY_UP;
-                        is::showLog("U Pressed !");
+                        // is::showLog("U Pressed !");
                         return true;
                     }
                 break;
@@ -383,7 +418,7 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
                         )
                     {
                         m_moveKeyPressed = V_KEY_DOWN;
-                        is::showLog("D Pressed !");
+                        // is::showLog("D Pressed !");
                         return true;
                     }
                 break;
@@ -398,9 +433,9 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
     if (virtualKeyIndex == V_KEY_A || virtualKeyIndex == V_KEY_B)
     {
         // check collision with right joystick
-        if (m_scene->mouseCollision(m_recJoystickMask[1], m_recRight)
+        if (m_scene->mouseCollision(m_recJoystickMask[1])
             #if defined(__ANDROID__)
-            || m_scene->mouseCollision(m_recJoystickMask[1], m_recRight, 1)
+            || m_scene->mouseCollision(m_recJoystickMask[1], 1)
             #endif // defined
             ) mouseOnRJoystick = true;
 
@@ -421,7 +456,7 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
                         )
                     {
                         m_actionKeyPressed = V_KEY_A;
-                        is::showLog("A Pressed !");
+                        // is::showLog("A Pressed !");
                         return true;
                     }
                 break;
@@ -434,7 +469,7 @@ bool GameKeyData::virtualKeyPressed(VirtualKeyIndex virtualKeyIndex)
                         )
                     {
                         m_actionKeyPressed = V_KEY_B;
-                        is::showLog("B Pressed !");
+                        // is::showLog("B Pressed !");
                         return true;
                     }
                 break;

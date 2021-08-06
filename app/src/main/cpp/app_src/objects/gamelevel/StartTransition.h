@@ -12,11 +12,11 @@
 class StartTransition : public is::MainObject
 {
 public:
-    StartTransition(sf::Texture &texPlayer, is::GameDisplay *scene) :
+    StartTransition(is::GameDisplay *scene) :
         MainObject(),
-        m_scene(scene),
-        m_texPlayer(texPlayer)
+        m_scene(scene)
     {
+        m_strName = "StartTransition";
         m_depth = -6; // It appears behind the HUD to display level information
 
         is::createText(m_scene->getFontSystem(), m_txtWorld,
@@ -24,8 +24,8 @@ public:
                        " - " + is::numToStr(m_scene->getGameSystem().m_currentLevel + 1),
                        m_scene->getViewX(), m_scene->getViewY() - 96.f, sf::Color::White, true, 24);
 
-        is::createSprite(m_texPlayer, m_sprParent, sf::IntRect(0, 0, 24, 48),
-                         sf::Vector2f(m_scene->getViewX() - 38.f, m_scene->getViewY() - 65.f), sf::Vector2f(12.f, 24.f));
+        is::createSprite(m_scene->GRMgetTexture("player"), m_sprParent, sf::IntRect(0, 0, 24, 48),
+                         sf::Vector2f(m_scene->getViewX() - 26.f, m_scene->getViewY() - 41.f), sf::Vector2f(12.f, 24.f));
 
         is::createText(m_scene->getFontSystem(), m_txtLives, " x  " + is::numToStr(m_scene->getGameSystem().m_currentLives),
                        m_scene->getViewX() + 15.f, m_scene->getViewY() - 37.f, sf::Color::White, true, 24);
@@ -58,16 +58,12 @@ public:
             auto gameCtrl = static_cast<GameController*>(m_scene->SDMgetObject("GameController"));
             gameCtrl->setLaunchTransition(false);
             gameCtrl->setCountLevelTime(true);
-            m_scene->GSMgetMusic("world_1")->play();
-
-            // don't play music if this option is off
-            if (!m_scene->getGameSystem().m_enableMusic) m_scene->GSMgetMusic("world_1")->pause();
-
+            m_scene->GSMplayMusic("world_1");
             m_destroy = true; // from here we destroy it so that it is no longer active
         }
     }
 
-    void draw(sf::RenderTexture &surface)
+    void draw(is::Render &surface)
     {
         surface.draw(m_rec);
         surface.draw(m_txtLives);
@@ -77,7 +73,6 @@ public:
 
 private:
     is::GameDisplay *m_scene;
-    sf::Texture &m_texPlayer;
     sf::Text m_txtLives, m_txtWorld;
     sf::RectangleShape m_rec;
 };

@@ -21,7 +21,7 @@ public:
         BLOCK_DEBRIS,
         COIN_FLY,
     };
-    Effect(sf::Texture &tex, EffectType type, float x, float y, is::GameDisplay *scene, float speed = 0.f, float Hspeed = 0.f);
+    Effect(EffectType type, float x, float y, is::GameDisplay *scene, float speed = 0.f, float Hspeed = 0.f);
     void step(float const &DELTA_TIME);
 
 private:

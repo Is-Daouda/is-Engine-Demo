@@ -1,14 +1,46 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #include "GameEngine.h"
+
+std::function<void(void)> main_loop;
+void MainLoop()
+{
+    return main_loop();
+}
 
 namespace is
 {
+GameEngine::GameEngine():
+    m_gameSysExt(m_window)
+{
+    srand((unsigned int)time(0));
+}
+
 GameEngine::~GameEngine()
 {
-    #if defined(__ANDROID__)
-    /// uncomment to active lock screen on Android
-    // is::setScreenLock(false);
-    #endif // defined
-}
+#if defined(IS_ENGINE_SDL_2)
+    is::SDL2freeLib();
+#endif
+};
 
 void GameEngine::initEngine()
 {
@@ -18,28 +50,44 @@ void GameEngine::initEngine()
                     is::getWindowStyle());
 
     #if !defined(__ANDROID__)
+    #if defined(IS_ENGINE_SFML)
     // load application icon
     sf::Image iconTex;
     if (iconTex.loadFromFile(is::GameConfig::GUI_DIR + "icon.png"))
     	m_window.setIcon(iconTex.getSize().x, iconTex.getSize().y, iconTex.getPixelsPtr());
+    #endif
 
     // create saving directory
+#if !defined(IS_ENGINE_HTML_5)
     if (!m_gameSysExt.fileExist(is::GameConfig::CONFIG_FILE))
     {
-        #if !defined(SFML_SYSTEM_LINUX)
-        mkdir("save");
-        #else
-        mkdir("save", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        #endif
+
+        mkdir(is::GameConfig::DATA_PARENT_DIR.c_str()
+                #if defined(SFML_SYSTEM_LINUX)
+                , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
+                #endif
+              );
         m_gameSysExt.saveConfig(is::GameConfig::CONFIG_FILE);
     }
-    #else
-        /// uncomment to disable lock screen on Android
-        // is::setScreenLock(true);
+#endif
     #endif // defined
 
-    m_window.setFramerateLimit(is::GameConfig::FPS);
+    setFPS(m_window, is::GameConfig::FPS);
 }
+
+#if defined(IS_ENGINE_HTML_5)
+void GameEngine::execMainLoop(std::function<bool(void)> loop)
+{
+    main_loop = [my_loop = loop] { (void)my_loop(); };
+    emscripten_set_main_loop(&MainLoop, -1, 1);
+}
+
+void GameEngine::execMainLoop(std::function<void(void)> loop)
+{
+    main_loop = loop;
+    emscripten_set_main_loop(&MainLoop, -1, 1);
+}
+#endif
 
 bool GameEngine::play()
 {
@@ -50,51 +98,36 @@ bool GameEngine::play()
 
     #if defined(__ANDROID__)
     #if defined(IS_ENGINE_USE_ADMOB)
-    ANativeActivity* activity = sf::getNativeActivity();
-    JNIEnv* env = activity->env;
-    JavaVM* vm = activity->vm;
+    JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+    jobject activity = (jobject)SDL_AndroidGetActivity();
+    JavaVM* vm;
+    env->GetJavaVM(&vm);
     vm->AttachCurrentThread(&env, NULL);
 
-    AdmobManager *admobManager = nullptr;
-    admobManager = new AdmobManager(m_window, activity, env, vm);
-    admobManager->checkAdObjInit();
+    m_gameSysExt.m_admobManager = std::make_shared<AdmobManager>(m_window, activity, env);
+    m_gameSysExt.m_admobManager->checkAdObjInit();
     #endif // definded
     #endif // defined
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                         GAME STARTUP
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    ActivityController app(m_window);
-    app.push<GameActivity>(m_gameSysExt);
-
-#if 1 || __ANDROID__
-    app.optimizeForPerformance(true);
-#endif
-
-    // run the program as long as the window is open
-    float elapsed(0.0f);
-    sf::Clock clock;
-    srand((unsigned int)time(0));
+    std::unique_ptr<ActivityController> app = std::make_unique<ActivityController>(m_gameSysExt);
+#if !defined(IS_ENGINE_HTML_5)
     while (m_window.isOpen())
+#else
+    EM_ASM(console.log("Start successfully!"); , 0);
+    execMainLoop([&]
     {
-        clock.restart();
-        m_window.clear();
-        app.update(elapsed);
-        app.draw();
-        m_window.display();
-        elapsed = static_cast<float>(clock.getElapsedTime().asSeconds());
+    if (emscripten_run_script_int("Module.syncdone") == 1)
+#endif
+    {
+        app->update();
+        app->draw();
     }
-
-    #if defined(__ANDROID__)
-    #if defined(IS_ENGINE_USE_ADMOB)
-     if (is::instanceExist(admobManager))
-     {
-         delete admobManager;
-         admobManager = 0;
-     }
-    #endif
-    #endif // defined
+#if defined(IS_ENGINE_HTML_5)
+    });
+#endif
     return true;
 }
 }

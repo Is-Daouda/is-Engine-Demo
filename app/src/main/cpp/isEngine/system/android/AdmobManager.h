@@ -1,5 +1,29 @@
+/*
+  is::Engine (Infinity Solution Engine)
+  Copyright (C) 2018-2021 Is Daouda <isdaouda.n@gmail.com>
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+*/
+
 #ifndef ADMOBMANAGER_H_INCLUDED
 #define ADMOBMANAGER_H_INCLUDED
+
+#include "../function/GameFunction.h"
+#include "../../../app_src/config/GameConfig.h"
 
 #if defined(__ANDROID__)
 #if defined(IS_ENGINE_USE_ADMOB)
@@ -10,8 +34,6 @@
 #include "firebase/admob/banner_view.h"
 #include "firebase/admob/rewarded_video.h"
 #include <android/native_activity.h>
-#include "../function/GameFunction.h"
-#include "../../../app_src/config/GameConfig.h"
 
 using namespace is::GameConfig::AdmobConfig;
 
@@ -49,31 +71,33 @@ static void WaitForFutureCompletion(firebase::FutureBase future)
 class AdmobManager
 {
 public:
-    firebase::App* m_admobApp;
+    firebase::App *m_admobApp = nullptr;
     firebase::admob::AdRequest m_request;
-    firebase::admob::BannerView* m_banner;
+    firebase::admob::BannerView *m_banner = nullptr;
     ANativeActivity* m_activity;
     sf::RenderWindow &m_window;
     bool m_changeBannerPos;
     bool m_showBanner;
     bool m_showRewardVideo;
+    bool m_relaunchAd;
 
     ~AdmobManager()
     {
+        delete m_admobApp;
         delete m_banner;
         firebase::admob::rewarded_video::Destroy();
         firebase::admob::Terminate();
-        delete m_admobApp;
     }
 
-    AdmobManager(sf::RenderWindow &window, ANativeActivity* activity, JNIEnv* env, JavaVM* vm) :
+    AdmobManager(sf::RenderWindow &window, ANativeActivity* activity, JNIEnv* env) :
             m_activity(activity),
             m_window(window),
             m_changeBannerPos(false),
             m_showBanner(false),
-            m_showRewardVideo(false)
+            m_showRewardVideo(false),
+            m_relaunchAd(false)
     {
-        m_admobApp = ::firebase::App::Create(firebase::AppOptions(), env, m_activity->clazz);
+        m_admobApp = ::firebase::App::Create(firebase::AppOptions(), env, m_activity);
         firebase::admob::Initialize(*m_admobApp, kAdMobAppID);
 
         // If the app is aware of the user's gender, it can be added to the targeting
@@ -123,7 +147,7 @@ public:
         banner_ad_size.height = kBannerHeight;
 
         m_banner = new firebase::admob::BannerView();
-        m_banner->Initialize(m_activity->clazz, kBannerAdUnit, banner_ad_size);
+        m_banner->Initialize(m_activity, kBannerAdUnit, banner_ad_size);
 
         firebase::admob::rewarded_video::Initialize();
     }
@@ -155,7 +179,9 @@ public:
                     m_showBanner = true;
                 }
             }
+            m_relaunchAd = false;
         }
+        else m_relaunchAd = true;
     };
 
     /// Hide ad banner
@@ -176,6 +202,48 @@ public:
             firebase::admob::rewarded_video::LoadAd(kRewardedVideoAdUnit, m_request);
         }
     };
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Display the reward video ads (run only when the request is successful)
+    ///
+    /// \return 1 if the reward video has been read correctly 0 if not
+    ////////////////////////////////////////////////////////////
+    virtual int showRewardVideo()
+    {
+        int result(0);
+        if (checkAdState(firebase::admob::rewarded_video::LoadAdLastResult()))
+        {
+            sf::Clock clock;
+            bool stopGameTread(true);
+            firebase::admob::rewarded_video::Show(m_activity);
+
+            if (checkAdState(firebase::admob::rewarded_video::ShowLastResult()))
+            {
+                while (stopGameTread)
+                {
+                    float dTime = clock.restart().asSeconds();
+                    if (dTime > is::MAX_CLOCK_TIME) dTime = is::MAX_CLOCK_TIME;
+
+                    if (firebase::admob::rewarded_video::presentation_state() ==
+                        firebase::admob::rewarded_video::kPresentationStateHidden) stopGameTread = false;
+
+                    sf::Event ev;
+                    while (m_window.pollEvent(ev))
+                    {
+                        if (ev.type == sf::Event::Closed) is::closeApplication();
+                    }
+                    m_window.clear(sf::Color::Black);
+                    m_window.display();
+                }
+
+                // End of the video
+                result = 1;
+                checkAdRewardObjReinitialize();
+            }
+        }
+        else loadRewardVideo();
+        return result;
+    }
 
     ////////////////////////////////////////////////////////////
     /// This function allows to avoid the loss of the window handle

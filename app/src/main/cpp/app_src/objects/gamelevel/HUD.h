@@ -10,9 +10,9 @@
 class HUD : public is::MainObject
 {
 public:
-    HUD(sf::Font const &fnt, sf::Texture &tex, is::GameDisplay *scene);
+    HUD(is::GameDisplay *scene);
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
     void setShowTime(bool val) {m_showTime = val;}
 
 private:

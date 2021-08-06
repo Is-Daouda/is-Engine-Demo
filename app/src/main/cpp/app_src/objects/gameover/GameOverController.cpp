@@ -1,12 +1,12 @@
 #include "GameOverController.h"
 
-GameOverController::GameOverController(sf::Font &fontTitle, sf::Texture &texPad, is::GameDisplay *scene) :
+GameOverController::GameOverController(is::GameDisplay *scene) :
     m_scene(scene),
     m_sceneIndex(m_scene->getGameSystem().m_launchOption)
 {
     // Here the text is displayed depending on the screen
     float txtX(320.f), txtY((m_sceneIndex == is::DisplayOption::GAME_OVER) ? 110.f : 32.f);
-    is::createWText(fontTitle, m_txtTitle,
+    is::createText(scene->GRMgetFont("font_title"), m_txtTitle,
                     ((m_sceneIndex == is::DisplayOption::GAME_OVER) ?
                          is::lang::game_over[m_scene->getGameSystem().m_gameLanguage] :
                          is::lang::end_msg_congrat[m_scene->getGameSystem().m_gameLanguage]),
@@ -14,18 +14,18 @@ GameOverController::GameOverController(sf::Font &fontTitle, sf::Texture &texPad,
     is::centerSFMLObj(m_txtTitle);
 
     // message (only for Game End Screen)
-    is::createWText(m_scene->getFontMsg(), m_txtEndMsg, is::lang::end_msg_sentences[m_scene->getGameSystem().m_gameLanguage],
+    is::createText(m_scene->getFontMsg(), m_txtEndMsg, is::lang::end_msg_sentences[m_scene->getGameSystem().m_gameLanguage],
                     32.f, txtY + 70.f, sf::Color::White, 22);
-    is::createWText(m_scene->getFontMsg(), m_txtGetEditor, is::lang::end_msg_lvl_editor[m_scene->getGameSystem().m_gameLanguage],
-                    32.f, txtY + 310.f, sf::Color::Yellow, 22, true);
+    is::createText(m_scene->getFontMsg(), m_txtGetEditor, is::lang::end_msg_lvl_editor[m_scene->getGameSystem().m_gameLanguage],
+                    320.f, txtY + 326.f, sf::Color::Yellow, true, 22);
 
     // create sprites
-    float xPos(240.f), yPos((m_sceneIndex == is::DisplayOption::GAME_OVER) ? 250.f : 360.f);
-    is::createSprite(texPad, m_sprPad1, sf::IntRect(0, 0, 160, 32), sf::Vector2f(xPos, yPos), sf::Vector2f(80.f, 16.f));
-    is::createSprite(texPad, m_sprPad2, sf::IntRect(0, 0, 160, 32), sf::Vector2f(xPos, yPos + 50.f), sf::Vector2f(80.f, 16.f));
+    float xPos(320.f), yPos((m_sceneIndex == is::DisplayOption::GAME_OVER) ? 250.f : 360.f);
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_sprPad1, sf::IntRect(0, 0, 160, 32), sf::Vector2f(xPos, yPos), sf::Vector2f(80.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_sprPad2, sf::IntRect(0, 0, 160, 32), sf::Vector2f(xPos, yPos + 50.f), sf::Vector2f(80.f, 16.f));
 
     float btSelectX(yPos + ((m_sceneIndex == is::DisplayOption::GAME_OVER) ? 0.f : 50.f));
-    is::createSprite(texPad, m_scene->getSprButtonSelect(), sf::IntRect(160, 0, 160, 32),sf::Vector2f(xPos, btSelectX), sf::Vector2f(80.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_scene->getSprButtonSelect(), sf::IntRect(160, 0, 160, 32),sf::Vector2f(xPos, btSelectX), sf::Vector2f(80.f, 16.f));
 
     // create texts
     is::createText(m_scene->getFontSystem(), m_txtRestartGame, is::lang::pad_restart_game[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f);
@@ -45,7 +45,8 @@ void GameOverController::step(float const &DELTA_TIME)
     bool mouseInCollison(false);
 
     // check collision with sprite
-    if (m_scene->mouseCollision(m_sprPad1) || m_scene->mouseCollision(m_sprPad2)) mouseInCollison = true;
+    if ((m_scene->mouseCollision(m_sprPad1) && m_sceneIndex == is::DisplayOption::GAME_OVER) ||
+        m_scene->mouseCollision(m_sprPad2)) mouseInCollison = true;
 
     if (!m_scene->getGameSystem().keyIsPressed(is::GameConfig::KEY_UP) &&
         !m_scene->getGameSystem().keyIsPressed(is::GameConfig::KEY_DOWN) &&
@@ -56,7 +57,7 @@ void GameOverController::step(float const &DELTA_TIME)
     {
         // change option with mouse (touch on Android)
         if (m_scene->mouseCollision(m_sprPad1) && m_scene->getOptionIndex() != CONTINUE &&
-            m_sceneIndex == is::DisplayOption::GAME_OVER)      m_scene->setOptionIndex(CONTINUE, true);
+            m_sceneIndex == is::DisplayOption::GAME_OVER) m_scene->setOptionIndex(CONTINUE, true);
         else if (m_scene->mouseCollision(m_sprPad2) && m_scene->getOptionIndex() != QUIT) m_scene->setOptionIndex(QUIT, true);
 
         // avoid the long pressing button effect
@@ -77,7 +78,7 @@ void GameOverController::step(float const &DELTA_TIME)
             m_sceneIndex == is::DisplayOption::GAME_END_SCREEN && m_imageScale < 1.05f)
         {
             m_imageScale = 1.4f;
-            is::openURL("www.github.com/Is-Daouda/is-Engine-Level-Editor");
+            is::openURL("www.github.com/Is-Daouda/is-Engine-Level-Editor", is::OpenURLAction::Http);
         }
 
         // validate option
@@ -91,6 +92,7 @@ void GameOverController::step(float const &DELTA_TIME)
             switch (m_scene->getOptionIndex())
             {
             case CONTINUE:
+                m_scene->getGameSystem().initData(false); // clear game play date (life, checkpont, score, ...)
                 m_scene->getGameSystem().m_launchOption = is::DisplayOption::GAME_LEVEL;
                 m_scene->getGameSystem().saveData(is::GameConfig::GAME_DATA_FILE); // save data
             break;
@@ -116,7 +118,7 @@ void GameOverController::step(float const &DELTA_TIME)
     if (m_scene->m_isClose) m_scene->setIsRunning(false);
 }
 
-void GameOverController::draw(sf::RenderTexture &surface)
+void GameOverController::draw(is::Render &surface)
 {
     surface.draw(m_txtTitle);
     if (m_sceneIndex == is::DisplayOption::GAME_OVER)

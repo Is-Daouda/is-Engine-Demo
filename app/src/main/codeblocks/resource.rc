@@ -1,2 +1,2 @@
 // application icon
-MAINICON ICON "env/windows/icon.ico"
+MAINICON ICON "../env/windows/icon.ico"

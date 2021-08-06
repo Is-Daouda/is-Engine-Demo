@@ -22,10 +22,10 @@ public:
         MUSHROOM_1UP
     };
 
-    Bonus(sf::Texture &tex, BonusType type, float x, float y, is::GameDisplay *scene);
+    Bonus(BonusType type, float x, float y, is::GameDisplay *scene);
 
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    //void draw(is::Render &surface);
     void jump()
     {
         if (static_cast<int>(m_timeJump) == 0) m_timeJump = 20.f;

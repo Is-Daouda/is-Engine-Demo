@@ -24,7 +24,10 @@ public:
     enum DialogIndex
     {
         DIALOG_NONE = -1,
-        DIALOG_PLAYER_MOVE
+        DIALOG_PLAYER_MOVE,
+
+        // example
+        // DIALOG_YOUR_DIALOG
     };
 
     ////////////////////////////////////////////////////////////
@@ -54,6 +57,12 @@ public:
                 checkMsg(is::lang::dialog_player_move);
             break;
 
+            // example
+            // case DIALOG_YOUR_DIALOG:
+            //     m_msgIndexMax = is::arraySize(is::lang::dialog_your_dialog);
+            //     checkMsg(is::lang::dialog_your_dialog);
+            // break;
+
             default:
             break;
         }
@@ -64,7 +73,7 @@ public:
     /// launch a dialog based on the enumeration index
     void setDialog(DialogIndex dialogIndex);
     void setMouseInCollison(bool val);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
 
     DialogIndex getDialogIndex() const
     {

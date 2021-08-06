@@ -1,10 +1,11 @@
 #include "GameIntroController.h"
 
-GameIntroController::GameIntroController(sf::Font &font, sf::Texture &texLogo, sf::Texture &texPad, is::GameDisplay *scene):
+GameIntroController::GameIntroController(is::GameDisplay *scene):
     is::MainObject(),
     Step(),
     m_scene(scene),
-    m_alphaRec(255),
+    m_transitionEffect(scene),
+    m_optionIndex(0),
     m_blind(false),
     m_isOnPad(false),
     m_openLanguageMenu(false),
@@ -13,192 +14,222 @@ GameIntroController::GameIntroController(sf::Font &font, sf::Texture &texLogo, s
     m_imageScale = 0.f;
     m_imageAlpha = 0;
 
+    // get texture
+    auto &texLogo = m_scene->GRMgetTexture("logo");
+    auto &texLogoBg = m_scene->GRMgetTexture("logo_bg");
+    auto &texPad = m_scene->GRMgetTexture("language_pad");
+
     // transition rectangle
-    is::createRectangle(m_recTransition, sf::Vector2f(m_scene->getViewW() + 10.f, m_scene->getViewH() + 10.f), sf::Color(0, 0, 0, m_alphaRec));
-    is::setSFMLObjX_Y(m_recTransition, 320.f, 240.f);
     is::createRectangle(m_recChooseLanguage, sf::Vector2f(650.f, 190.f), sf::Color(0, 0, 0), 320.f, 240.f, true);
     is::setSFMLObjScale(m_recChooseLanguage, m_imageScale);
 
     if (m_scene->getGameSystem().m_firstLaunch)
     {
-        is::createWText(font, m_txtChooseLanguage, L"Choose Language", 0.f, 0.f, sf::Color(255, 255, 255), 48);
-        is::centerSFMLObj(m_txtChooseLanguage);
-        is::setSFMLObjX_Y(m_txtChooseLanguage, m_scene->getViewX(), m_scene->getViewY() - 90.f);
-
-        // create sprites
-        float btX(230.f), btY(205.f);
-        is::createSprite(texPad, m_scene->getSprButtonSelect(), sf::IntRect(192, 0, 192, 48), sf::Vector2f(btX, btY), sf::Vector2f(96.f, 24.f));
-        is::createSprite(texPad, m_sprPadFr, sf::IntRect(192, 0, 192, 48), sf::Vector2f(btX, btY + 66.f), sf::Vector2f(96.f, 24.f));
-        is::createText(m_scene->getFontSystem(), m_txtLangEng, is::lang::pad_game_language[is::lang::GameLanguage::ENGLISH],
-                       is::getSFMLObjX(m_scene->getSprButtonSelect()), is::getSFMLObjY(m_scene->getSprButtonSelect()) - 6.f,
-                       sf::Color(255, 255, 255), true, 25);
-        is::createText(m_scene->getFontSystem(), m_txtLangFr, is::lang::pad_game_language[is::lang::GameLanguage::FRANCAIS],
-                       is::getSFMLObjX(m_sprPadFr), is::getSFMLObjY(m_sprPadFr) - 6.f, sf::Color(255, 255, 255), true, 25);
+        is::createText(m_scene->GRMgetFont("font_title"), m_txtChooseLanguage, "Choose Language", m_scene->getViewX(), m_scene->getViewY() - 74.f, sf::Color::White, true, 48);
+        is::createSprite(texPad, m_sprButtonSelect, sf::IntRect(0, 0, 90, 96), sf::Vector2f(m_scene->getViewX() - 64.f, m_scene->getViewY() + 28.f), sf::Vector2f(45.f, 48.f));
+        is::createSprite(texPad, m_sprPadFr, sf::IntRect(90, 0, 90, 96), sf::Vector2f(m_scene->getViewX() + 64.f, m_scene->getViewY() + 28.f), sf::Vector2f(45.f, 48.f));
         m_openLanguageMenu = true;
     }
-    is::createSprite(texLogo, m_sprParent, sf::IntRect(0, 0, 256, 128), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f));
+
+    // create sprite
+    is::createSprite(texLogo, m_sprLogo, sf::IntRect(0, 0, 256, 128), sf::Vector2f(0.f, 0.f), sf::Vector2f(128.f, 64.f));
+    is::createSprite(texLogoBg, m_sprLogoBg, sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f));
     WITH (2)
     {
         is::createSprite(texLogo, m_sprGear[_I], sf::IntRect(0, 128, 22, 22), sf::Vector2f(0.f, 0.f), sf::Vector2f(11.f, 11.f));
         is::createSprite(texLogo, m_sprHandGear[_I], sf::IntRect(21, 128, 70, 70), sf::Vector2f(0.f, 0.f), sf::Vector2f(35.f, 35.f));
     }
-    is::setSFMLObjX_Y(m_sprGear[0], m_scene->getViewX() - 0.5f, m_scene->getViewY() - 75.5f);
-    is::setSFMLObjX_Y(m_sprGear[1], m_scene->getViewX(), m_scene->getViewY() + 38.5f);
-    is::setSFMLObjX_Y(m_sprHandGear[0], m_scene->getViewX() - 265.5f, m_scene->getViewY() - 46.f);
-    is::setSFMLObjX_Y(m_sprHandGear[1], m_scene->getViewX() + 265.f, m_scene->getViewY() - 46.f);
-    is::centerSFMLObj(m_sprParent);
-    is::setSFMLObjX_Y(m_sprParent, m_scene->getViewX(), m_scene->getViewY());
+    is::setSFMLObjX_Y(m_sprGear[0], m_scene->getViewX()
+#if defined(IS_ENGINE_SDL_2)
+                       + 0.85f
+#else
+                       - 1.5f
+#endif
+                       , m_scene->getViewY() - 33.5f);
+    is::setSFMLObjX_Y(m_sprGear[1], m_scene->getViewX()
+#if defined(IS_ENGINE_SDL_2)
+                      + 1.f
+#endif
+                      , m_scene->getViewY() + 80.5f);
+    is::setSFMLObjX_Y(m_sprHandGear[0], m_scene->getViewX()
+#if defined(IS_ENGINE_SDL_2)
+                      - 265.5f
+#else
+                      - 262.5f
+#endif
+                      , m_scene->getViewY() - 4.f);
+    is::setSFMLObjX_Y(m_sprHandGear[1], m_scene->getViewX()
+#if defined(IS_ENGINE_SDL_2)
+                      + 265.f
+#else
+                      + 258.f
+#endif
+                      , m_scene->getViewY() - 4.f);
+    m_sprLogo.setPosition(m_scene->getViewX(), m_scene->getViewY());
 }
 
 void GameIntroController::step(float const &DELTA_TIME)
 {
-    // intro step
+    // DELTA TIME
+    float const SPEED(1.2f);
+    float const ROTATION_SPEED(7.f);
+    float const TRANSITION_SPEED(static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME));
+
+    // intro animation step
     switch(m_step)
     {
-        case 0 :
-            if (m_openLanguageMenu)
+    case 0:
+        if (m_openLanguageMenu)
+        {
+            bool mouseInCollison(false);
+            is::increaseVar(DELTA_TIME, m_imageScale, 0.08f, 1.f, 1.f);
+
+            if (!m_scene->getGameSystem().isPressed()) m_scene->getGameSystem().m_keyIsPressed = false;
+
+            if (m_scene->mouseCollision(m_sprButtonSelect)) mouseInCollison = true;
+            else if (m_scene->mouseCollision(m_sprPadFr)) mouseInCollison = true;
+            else m_isOnPad = false;
+            if (!mouseInCollison && m_scene->getGameSystem().isPressed()) m_scene->getGameSystem().m_keyIsPressed = true;
+            auto tempFnct = [this](int index)
             {
-                bool mouseInCollison(false);
-                is::increaseVar(DELTA_TIME, m_imageScale, 0.08f, 1.f, 1.f);
+                m_optionIndex = index;
+                m_isOnPad = true;
+            };
 
-                if (!m_scene->getGameSystem().isPressed()) m_scene->getGameSystem().m_keyIsPressed = false;
+            if (!m_isOnPad)
+            {
+                if (m_scene->mouseCollision(m_sprButtonSelect)) tempFnct(is::lang::GameLanguage::ENGLISH);
+                else if (m_scene->mouseCollision(m_sprPadFr)) tempFnct(is::lang::GameLanguage::FRANCAIS);
+            }
 
-                if (m_scene->mouseCollision(m_scene->getSprButtonSelect())) mouseInCollison = true;
-                else if (m_scene->mouseCollision(m_sprPadFr)) mouseInCollison = true;
-                else m_isOnPad = false;
-
-                if (!mouseInCollison && m_scene->getGameSystem().isPressed()) m_scene->getGameSystem().m_keyIsPressed = true;
-                auto tempFnct = [this](int index)
+            if ((m_scene->getGameSystem().keyIsPressed(is::GameConfig::KEY_VALIDATION_KEYBOARD) ||
+                (m_scene->getGameSystem().isPressed(is::GameSystem::MOUSE) && mouseInCollison)) &&
+                !m_scene->getGameSystem().m_keyIsPressed)
+            {
+                m_scene->GSMplaySound("select_option");
+                m_scene->getGameSystem().useVibrate(m_scene->getVibrateTimeDuration());
+                m_scene->getGameSystem().m_gameLanguage = m_optionIndex;
+                m_scene->getGameSystem().m_firstLaunch = false;
+                m_scene->getGameSystem().saveConfig(is::GameConfig::CONFIG_FILE);
+                m_openLanguageMenu = false;
+            }
+        }
+        else
+        {
+            is::decreaseVar(DELTA_TIME, m_imageScale, 0.08f, 0.f, 0.f);
+            if (!m_blind)
+            {
+                if (m_imageAlpha > 90 && !m_playSnd)
                 {
-                    m_scene->setOptionIndex(index);
-                    m_isOnPad = true;
-                };
-
-                if (!m_isOnPad)
-                {
-                    if (m_scene->mouseCollision(m_scene->getSprButtonSelect())) tempFnct(is::lang::GameLanguage::ENGLISH);
-                    else if (m_scene->mouseCollision(m_sprPadFr)) tempFnct(is::lang::GameLanguage::FRANCAIS);
+                    m_scene->GSMplaySound("logo_sound");
+                    m_playSnd = true;
                 }
-
-                if ((m_scene->getGameSystem().keyIsPressed(is::GameConfig::KEY_VALIDATION_KEYBOARD) ||
-                    (m_scene->getGameSystem().isPressed() && mouseInCollison)) &&
-                    (m_scene->getWaitTime() == 0 && !m_scene->getGameSystem().m_keyIsPressed))
+                if (m_imageAlpha < 250) m_imageAlpha += static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME);
+                else
                 {
-                    m_scene->GSMplaySound("select_option"); // We play this sound
+                    m_imageAlpha = 0;
                     m_scene->getGameSystem().useVibrate(m_scene->getVibrateTimeDuration());
-                    m_scene->getGameSystem().m_gameLanguage = m_scene->getOptionIndex();
-                    m_scene->getGameSystem().m_firstLaunch = false;
-                    m_scene->getGameSystem().saveConfig(is::GameConfig::CONFIG_FILE);
-                    m_openLanguageMenu = false;
+                    m_sprLogo.setTextureRect(sf::IntRect(256, 0, 256, 128));
+                    m_sprLogo.setColor(sf::Color(255, 255, 255, m_imageAlpha));
+                    m_blind = true;
                 }
             }
             else
             {
-                is::decreaseVar(DELTA_TIME, m_imageScale, 0.09f, 0.f, 0.f);
-
-                if (!m_blind)
-                {
-                    if (m_imageAlpha > 90 && !m_playSnd)
-                    {
-                        m_scene->GSMplaySound("logo_sound");
-                        m_playSnd = true;
-                    }
-                    if (m_imageAlpha < 250) m_imageAlpha += static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME);
-                    else
-                    {
-                        m_imageAlpha = 0;
-                        m_scene->getGameSystem().useVibrate(m_scene->getVibrateTimeDuration());
-                        is::setSFMLObjAlpha(m_sprParent, m_imageAlpha);
-                        is::setSFMLObjTexRec(m_sprParent, 256, 0, 256, 128);
-                        m_blind = true;
-                    }
-                }
-                else
-                {
-                    if (m_imageAlpha < 240) m_imageAlpha += static_cast<int>((10.f * is::VALUE_CONVERSION) * DELTA_TIME);
-                    else m_imageAlpha = 255;
-                    is::setSFMLObjAlpha(m_sprParent, m_imageAlpha);
-                }
-
-                if (m_alphaRec > 5) m_alphaRec -= static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME);
-                else
-                {
-                    m_alphaRec = 0;
-                    if (m_time < 40) m_time += is::getMSecond(DELTA_TIME);
-                    else m_step++;
-                }
+                if (m_imageAlpha < 240) m_imageAlpha += static_cast<int>((10.f * is::VALUE_CONVERSION) * DELTA_TIME);
+                else m_imageAlpha = 255;
+                m_sprLogo.setColor(sf::Color(255, 255, 255, m_imageAlpha));
             }
-            is::setSFMLObjScale(m_recChooseLanguage, m_imageScale);
-        break;
 
-        case 1:
-            if (m_alphaRec < 250) m_alphaRec += static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME);
+            // transition effect start
+            if (m_transitionEffect.getImageAlpha() > 5) m_transitionEffect.setImageAlpha(m_transitionEffect.getImageAlpha() - TRANSITION_SPEED);
             else
             {
-                if (m_time < 50)
-                {
-                    m_alphaRec = 255;
-                    m_time += is::getMSecond(DELTA_TIME);
-                    is::setSFMLObjFillColor(m_recChooseLanguage, sf::Color(0, 128, 255));
-                    is::setSFMLObjTexRec(m_sprParent, 91, 128, 600, 194);
-                    is::centerSFMLObj(m_sprParent);
-                }
+                m_transitionEffect.setImageAlpha(0);
+                if (m_time < 50) m_time += static_cast<int>(SPEED * is::VALUE_CONVERSION * DELTA_TIME);
                 else m_step++;
             }
-        break;
+        }
+        is::setSFMLObjScaleX_Y(m_recChooseLanguage, 1.f, m_imageScale);
+    break;
 
-        case 2:
-            is::increaseVar(DELTA_TIME, m_imageScale, 0.06f, 1.2f, 1.2f);
-            is::setSFMLObjScaleX_Y(m_recChooseLanguage, 1.2, m_imageScale);
-            if (m_alphaRec > 5) m_alphaRec -= static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME);
-            else
+    case 1:
+        // transition effect end
+        if (m_transitionEffect.getImageAlpha() < 250) m_transitionEffect.setImageAlpha(m_transitionEffect.getImageAlpha() + TRANSITION_SPEED);
+        else
+        {
+            if (m_time < 55)
             {
-                m_alphaRec = 0;
-                if (m_time < is::SECOND) m_time += is::getMSecond(DELTA_TIME);
-                else m_step++;
+                m_transitionEffect.setImageAlpha(255);
+                is::setSFMLObjFillColor(m_recChooseLanguage, sf::Color(0, 128, 255));
+                m_time += static_cast<int>(SPEED * is::VALUE_CONVERSION * DELTA_TIME);
+                is::setSFMLObjTexRec(m_sprLogo, 91, 128, 600, 282);
+                is::centerSFMLObj(m_sprLogo);
             }
-        break;
-
-        case 3:
-            if (m_alphaRec < 250) m_alphaRec += static_cast<int>((4.f * is::VALUE_CONVERSION) * DELTA_TIME);
             else
             {
-                m_scene->setIsRunning(false);  // quit the scene main loop
-                m_scene->getGameSystem().m_launchOption = is::DisplayOption::MAIN_MENU;  // go to main menu scene
+                #if defined(IS_ENGINE_SDL_2)
+                is::setSFMLObjX(m_sprLogo, m_scene->getViewX() - 4.f);
+                is::setSFMLObjY(m_recChooseLanguage, is::getSFMLObjY(m_recChooseLanguage) - 56.f);
+                #endif // defined
                 m_step++;
             }
-        break;
+        }
+    break;
+    case 2:
+        is::increaseVar(DELTA_TIME, m_imageScale, 0.06f, 1.6f, 1.6f);
+        is::setSFMLObjScaleX_Y(m_recChooseLanguage, 1.2, m_imageScale);
+        if (m_scene->getGameSystem().isPressed(is::GameSystem::ALL_BUTTONS)) m_step++;
+
+        // transition effect start
+        if (m_transitionEffect.getImageAlpha() > 5) m_transitionEffect.setImageAlpha(m_transitionEffect.getImageAlpha() - TRANSITION_SPEED);
+        else
+        {
+            m_transitionEffect.setImageAlpha(0);
+            if (m_time < 95) m_time += static_cast<int>(SPEED * is::VALUE_CONVERSION * DELTA_TIME);
+            else m_step++;
+        }
+    break;
+    case 3:
+        // transition effect end
+        if (m_transitionEffect.getImageAlpha() < 250) m_transitionEffect.setImageAlpha(m_transitionEffect.getImageAlpha() + TRANSITION_SPEED);
+        else
+        {
+            m_scene->setIsRunning(false);  // quit the main render loop
+            m_scene->getGameSystem().m_launchOption = is::DisplayOption::MAIN_MENU;  // go to main menu
+            m_step++;
+        }
+    break;
     }
-    is::setSFMLObjRotate(m_sprGear[0], 5.f * is::VALUE_CONVERSION * DELTA_TIME);
-    is::setSFMLObjRotate(m_sprGear[1], -13.f * is::VALUE_CONVERSION * DELTA_TIME);
-    is::setSFMLObjRotate(m_sprHandGear[0], 6.3f * is::VALUE_CONVERSION * DELTA_TIME);
-    is::setSFMLObjRotate(m_sprHandGear[1], -6.3f * is::VALUE_CONVERSION * DELTA_TIME);
-    if (m_step < 3) is::setSFMLObjFillColor(m_recTransition, sf::Color(255, 255, 255, m_alphaRec));
-    else is::setSFMLObjFillColor(m_recTransition, sf::Color(0, 0, 0, m_alphaRec));
+    is::setSFMLObjRotate(m_sprGear[0], ROTATION_SPEED + 2.f * is::VALUE_CONVERSION * DELTA_TIME);
+    is::setSFMLObjRotate(m_sprGear[1], -(ROTATION_SPEED + 4.f) * is::VALUE_CONVERSION * DELTA_TIME);
+    is::setSFMLObjRotate(m_sprHandGear[0], ROTATION_SPEED * is::VALUE_CONVERSION * DELTA_TIME);
+    is::setSFMLObjRotate(m_sprHandGear[1], -ROTATION_SPEED * is::VALUE_CONVERSION * DELTA_TIME);
+    if (m_step <= 2) is::setSFMLObjFillColor(m_transitionEffect.getRecTransition(), sf::Color(255, 255, 255, m_transitionEffect.getImageAlpha()));
+    else is::setSFMLObjFillColor(m_transitionEffect.getRecTransition(), sf::Color(0, 0, 0, m_transitionEffect.getImageAlpha()));
 }
 
-void GameIntroController::draw(sf::RenderTexture &surface)
+void GameIntroController::draw(is::Render &surface)
 {
-    if (m_imageScale > 0.f) surface.draw(m_recChooseLanguage);
+    if (m_imageScale > 0.f) is::draw(surface, m_recChooseLanguage);
     if (m_openLanguageMenu)
     {
-        surface.draw(m_scene->getSprButtonSelect());
-        surface.draw(m_sprPadFr);
-        surface.draw(m_txtChooseLanguage);
-        surface.draw(m_txtLangEng);
-        surface.draw(m_txtLangFr);
+        is::draw(surface, m_sprButtonSelect);
+        is::draw(surface, m_sprPadFr);
+        is::draw(surface, m_txtChooseLanguage);
     }
     else
     {
-        surface.draw(m_sprParent);
+        if (m_step < 2) is::draw(surface, m_sprLogoBg);
+        is::draw(surface, m_sprLogo);
         if (m_step > 1)
         {
             WITH(2)
             {
-                surface.draw(m_sprGear[_I]);
-                surface.draw(m_sprHandGear[_I]);
+                is::draw(surface, m_sprGear[_I]);
+                is::draw(surface, m_sprHandGear[_I]);
             }
         }
-        if (m_step < 3) surface.draw(m_recTransition);
+        is::draw(surface, m_transitionEffect.getRecTransition());
     }
 }

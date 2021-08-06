@@ -1,7 +1,7 @@
 #include "GameLevel.h"
 
-GameLevel::GameLevel(sf::RenderWindow &window, sf::View &view, sf::RenderTexture &surface, is::GameSystemExtended &gameSysExt):
-    GameDisplay(window, view, surface, gameSysExt, sf::Color(36, 146, 255)),
+GameLevel::GameLevel(is::GameSystemExtended &gameSysExt):
+    GameDisplay(gameSysExt, sf::Color(36, 146, 255)),
     CURRENT_LEVEL(gameSysExt.m_currentLevel)
 {
     // redefine view parameter
@@ -9,7 +9,6 @@ GameLevel::GameLevel(sf::RenderWindow &window, sf::View &view, sf::RenderTexture
     m_viewY = (m_viewH / 2.f);
     m_sceneWidth = 0;
     m_sceneHeight = 0;
-    srand(time(NULL));
 }
 
 void GameLevel::SDMmanageSceneEvents()

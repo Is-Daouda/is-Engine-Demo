@@ -1,22 +1,23 @@
 #include "GameMenu.h"
 
-GameMenu::GameMenu(sf::RenderWindow &window, sf::View &view, sf::RenderTexture &surface, is::GameSystemExtended &gameSysExt):
-    GameDisplay(window, view, surface, gameSysExt, sf::Color::White) {}
+GameMenu::GameMenu(is::GameSystemExtended &gameSysExt):
+    GameDisplay(gameSysExt, sf::Color::White) {}
 
 void GameMenu::loadResources()
 {
     GameDisplay::loadParentResources();
+    m_gameSysExt.initData(true);
 
     // load textures
-    is::loadSFMLObjResource(m_texPad, is::GameConfig::GUI_DIR + "main_menu_pad.png");
-    is::loadSFMLObjResource(m_texPad2, is::GameConfig::GUI_DIR + "option_pad.png");
-    is::loadSFMLObjResource(m_texToolsPad, is::GameConfig::GUI_DIR + "tools_pad.png");
-    is::loadSFMLObjResource(m_texGamePad, is::GameConfig::GUI_DIR + "game_pad.png");
-    is::loadSFMLObjResource(m_texScreenBG, is::GameConfig::SPRITES_DIR + "menu_background.png");
+    GRMaddTexture("main_menu_pad", is::GameConfig::GUI_DIR + "main_menu_pad.png");
+    GRMaddTexture("option_pad", is::GameConfig::GUI_DIR + "option_pad.png");
+    GRMaddTexture("tools_pad", is::GameConfig::GUI_DIR + "tools_pad.png");
+    GRMaddTexture("game_pad", is::GameConfig::GUI_DIR + "game_pad.png");
+    auto &bg = GRMaddTexture("menu_background", is::GameConfig::SPRITES_DIR + "menu_background.png");
 
-    SDMaddSceneObject(std::make_shared<is::Background>(m_texScreenBG, 0.f, 0.f, this, 0.f, 0.f, false, false));
-    SDMaddSceneObject(std::make_shared<MenuController>(m_texPad, m_texPad2, m_texToolsPad, m_texScreenBG, m_texGamePad ,this));
-    SDMaddSceneObject(std::make_shared<CancelButton>(m_texToolsPad, this));
+    SDMaddSceneObject(std::make_shared<is::Background>(bg, 0.f, 0.f, this, 0.f, 0.f, false, false));
+    SDMaddSceneObject(std::make_shared<MenuController>(this));
+    SDMaddSceneObject(std::make_shared<CancelButton>(this));
 }
 
 void GameMenu::SDMmanageSceneEvents()

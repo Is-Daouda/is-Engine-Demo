@@ -1,7 +1,6 @@
 #include "MenuController.h"
 
-MenuController::MenuController(sf::Texture &texPad, sf::Texture &texPad2, sf::Texture &texToolsPad, sf::Texture &texScreenBG,
-                                sf::Texture &texGamePad, is::GameDisplay *scene):
+MenuController::MenuController(is::GameDisplay *scene):
     m_pageName(PAGE_MAIN_MENU),
     m_scene(scene),
     m_gameOptionIndex(0),
@@ -18,13 +17,13 @@ MenuController::MenuController(sf::Texture &texPad, sf::Texture &texPad2, sf::Te
     // load configuration file
     if (m_scene->getGameSystem().fileExist(is::GameConfig::CONFIG_FILE)) m_scene->getGameSystem().loadConfig(is::GameConfig::CONFIG_FILE);
 
-    float distance(5.f), widgetSpace(55.f), xPos(51.f), yPos(250.f);
+    float distance(5.f), widgetSpace(55.f), xPos(147.f), yPos(274.f);
 
     // create sprites
-    is::createSprite(texPad, m_sprPad1, sf::IntRect(0, 0, 192, 48), sf::Vector2f(xPos, yPos + distance), sf::Vector2f(96.f, 24.f));
-    is::createSprite(texPad, m_sprPad2, sf::IntRect(0, 0, 192, 48), sf::Vector2f(xPos, yPos + widgetSpace + distance), sf::Vector2f(96.f, 24.f));
-    is::createSprite(texPad, m_sprPad3, sf::IntRect(0, 0, 192, 48), sf::Vector2f(xPos, yPos + widgetSpace * 2.f + distance), sf::Vector2f(96.f, 24.f));
-    is::createSprite(texPad, m_scene->getSprButtonSelect(), sf::IntRect(192, 0, 192, 48), sf::Vector2f(xPos, yPos + distance), sf::Vector2f(96.f, 24.f));
+    is::createSprite(m_scene->GRMgetTexture("main_menu_pad"), m_sprPad1, sf::IntRect(0, 0, 192, 48), sf::Vector2f(xPos, yPos + distance), sf::Vector2f(96.f, 24.f));
+    is::createSprite(m_scene->GRMgetTexture("main_menu_pad"), m_sprPad2, sf::IntRect(0, 0, 192, 48), sf::Vector2f(xPos, yPos + widgetSpace + distance), sf::Vector2f(96.f, 24.f));
+    is::createSprite(m_scene->GRMgetTexture("main_menu_pad"), m_sprPad3, sf::IntRect(0, 0, 192, 48), sf::Vector2f(xPos, yPos + widgetSpace * 2.f + distance), sf::Vector2f(96.f, 24.f));
+    is::createSprite(m_scene->GRMgetTexture("main_menu_pad"), m_scene->getSprButtonSelect(), sf::IntRect(192, 0, 192, 48), sf::Vector2f(xPos, yPos + distance), sf::Vector2f(96.f, 24.f));
     float btYSize(0.9f);
     is::setSFMLObjScaleX_Y(m_sprPad1, 1.f, btYSize);
     is::setSFMLObjScaleX_Y(m_sprPad2, 1.f, btYSize);
@@ -37,7 +36,7 @@ MenuController::MenuController(sf::Texture &texPad, sf::Texture &texPad2, sf::Te
                    is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1) - TXT_Y_ON_BT, sf::Color::Blue, true, _PAD_TXT_SIZE);
     is::createText(m_scene->getFontSystem(), m_txtContinue, is::lang::pad_continue_game[m_scene->getGameSystem().m_gameLanguage],
                    is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2) - TXT_Y_ON_BT, true, _PAD_TXT_SIZE);
-    is::createWText(m_scene->getFontSystem(), m_txtPadConfig, is::lang::pad_controller[m_scene->getGameSystem().m_gameLanguage],
+    is::createText(m_scene->getFontSystem(), m_txtPadConfig, is::lang::pad_controller[m_scene->getGameSystem().m_gameLanguage],
                    is::getSFMLObjX(m_sprPad3), is::getSFMLObjY(m_sprPad3) - TXT_Y_ON_BT, sf::Color(0, 0, 0), _PAD_TXT_SIZE);
     is::centerSFMLObj(m_txtPadConfig);
 
@@ -65,13 +64,13 @@ MenuController::MenuController(sf::Texture &texPad, sf::Texture &texPad2, sf::Te
     m_scene->getGameSystem().loadPadConfig(is::GameConfig::GAME_PAD_FILE);
 
     float _xPos(150.f);
-    is::createSprite(texPad2, m_sprPermuteAB, sf::IntRect(160, 0, 160, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(80.f, 16.f));
+    is::createSprite(m_scene->GRMgetTexture("option_pad"), m_sprPermuteAB, sf::IntRect(160, 0, 160, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(80.f, 16.f));
     is::setSFMLObjX_Y(m_sprPermuteAB, m_scene->getViewX() - _xPos - 20.f, m_scene->getViewY() - 80.f);
-    is::createWText(m_scene->getFontSystem(), m_txtPermuteAB, is::lang::msg_permute_AB[m_scene->getGameSystem().m_gameLanguage] + getABPlace(), 0.f, 0.f, sf::Color(255, 255, 255));
+    is::createText(m_scene->getFontSystem(), m_txtPermuteAB, is::lang::msg_permute_AB[m_scene->getGameSystem().m_gameLanguage] + getABPlace(), 0.f, 0.f, sf::Color(255, 255, 255));
     is::centerSFMLObj(m_txtPermuteAB);
     is::setSFMLObjX_Y(m_txtPermuteAB, is::getSFMLObjX(m_sprPermuteAB), is::getSFMLObjY(m_sprPermuteAB) - TXT_Y_ON_BT + 1.f);
 
-    is::createWText(m_scene->getFontSystem(), m_txtMovePad, is::lang::msg_how_move_control[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f, sf::Color(255, 255, 255, 80));
+    is::createText(m_scene->getFontSystem(), m_txtMovePad, is::lang::msg_how_move_control[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f, sf::Color(255, 255, 255, 80));
     is::centerSFMLObj(m_txtMovePad);
     is::setSFMLObjX_Y(m_txtMovePad, m_scene->getViewX(), m_scene->getViewY());
 
@@ -79,12 +78,12 @@ MenuController::MenuController(sf::Texture &texPad, sf::Texture &texPad2, sf::Te
     is::setSFMLObjFillColor(m_txtSetAlpha, sf::Color::White);
 
     float const _DIST(65.f);
-    is::createSprite(texToolsPad, m_sprAddAlpha, sf::IntRect(32, 0, 32, 32),
+    is::createSprite(m_scene->GRMgetTexture("tools_pad"), m_sprAddAlpha, sf::IntRect(32, 0, 32, 32),
                      sf::Vector2f(is::getSFMLObjX(m_txtSetAlpha) + _DIST, is::getSFMLObjY(m_txtSetAlpha) - 10.f), sf::Vector2f(16.f, 16.f));
-    is::createSprite(texToolsPad, m_sprReduceAlpha, sf::IntRect(96, 0, 32, 32),
+    is::createSprite(m_scene->GRMgetTexture("tools_pad"), m_sprReduceAlpha, sf::IntRect(96, 0, 32, 32),
                      sf::Vector2f(is::getSFMLObjX(m_txtSetAlpha) - _DIST - 32.f, is::getSFMLObjY(m_txtSetAlpha) - 10.f), sf::Vector2f(16.f, 16.f));
-    is::createSprite(texGamePad, m_sprJoystick[0], sf::IntRect(0, 0, 134, 134), sf::Vector2f(0.f, 0.f), sf::Vector2f(67.f, 67.f));
-    is::createSprite(texGamePad, m_sprJoystick[1], sf::IntRect(134, ((!m_scene->getGameSystem().m_permutePadAB) ? 0 : 67), 144, 67), sf::Vector2f(0.f, 0.f), sf::Vector2f(72.f, 37.f));
+    is::createSprite(m_scene->GRMgetTexture("game_pad"), m_sprJoystick[0], sf::IntRect(0, 0, 134, 134), sf::Vector2f(0.f, 0.f), sf::Vector2f(67.f, 67.f));
+    is::createSprite(m_scene->GRMgetTexture("game_pad"), m_sprJoystick[1], sf::IntRect(134, ((!m_scene->getGameSystem().m_permutePadAB) ? 0 : 67), 144, 67), sf::Vector2f(0.f, 0.f), sf::Vector2f(72.f, 37.f));
     is::createRectangle(m_recLine, sf::Vector2f(650.f, 1.5f), sf::Color::White, m_scene->getViewX(), m_scene->getViewY() - 34.f, true);
     is::createRectangle(m_recSelectPad, sf::Vector2f(134.f, 134.f), sf::Color::Transparent, 0.f, 0.f, true);
     is::setSFMLObjOutlineColor(m_recSelectPad, 1.f, sf::Color::Red);
@@ -331,24 +330,23 @@ void MenuController::step(float const &DELTA_TIME)
         {
             auto setKeyPos = [this](int index, float &xVar, float &yVar)
             {
-                sf::RectangleShape rec;
-                if (m_scene->mouseCollision(m_sprJoystick[index], rec) && m_scene->getGameSystem().isPressed())
+                sf::Vector2f pos;
+                if (m_scene->mouseCollision(m_sprJoystick[index], pos) && m_scene->getGameSystem().isPressed())
                 {
                     m_padCfgClicked = true;
                     bool haveError(false), canMove(true);
-                    auto checkPadDistance = [this, &rec, &canMove](int _index)
+                    auto checkPadDistance = [this, &pos, &canMove](int _index)
                     {
-                        if (is::pointDistance(is::getSFMLObjX(rec), is::getSFMLObjY(rec),
-                                          is::getSFMLObjX(m_sprJoystick[_index]), is::getSFMLObjY(m_sprJoystick[_index])) < 160.f) canMove = false;
+                        if (is::pointDistance(pos.x, pos.y,
+                                              is::getSFMLObjX(m_sprJoystick[_index]),
+                                              is::getSFMLObjY(m_sprJoystick[_index])) < 160.f) canMove = false;
                     };
                     if (index == 0) checkPadDistance(1); else checkPadDistance(0);
 
                     if (canMove)
                     {
-                        float _x(((is::getSFMLObjX(rec) > m_scene->getViewX()) ? 1.f : -1.f) * is::pointDistance(is::getSFMLObjX(rec),
-                                 is::getSFMLObjY(rec), m_scene->getViewX(), is::getSFMLObjY(rec)));
-                        float _y(((is::getSFMLObjY(rec) > m_scene->getViewY()) ? 1.f : -1.f) * is::pointDistance(is::getSFMLObjX(rec),
-                                 is::getSFMLObjY(rec), is::getSFMLObjX(rec), m_scene->getViewY()));
+                        float _x(((pos.x > m_scene->getViewX()) ? 1.f : -1.f) * is::pointDistance(pos.x, pos.y, m_scene->getViewX(), pos.y));
+                        float _y(((pos.y > m_scene->getViewY()) ? 1.f : -1.f) * is::pointDistance(pos.x, pos.y, pos.x, m_scene->getViewY()));
 
                         float _xSize(67.f), _ySize(67.f);
                         if (index == 1)
@@ -357,24 +355,24 @@ void MenuController::step(float const &DELTA_TIME)
                             _ySize = 37.f;
                         }
 
-                        if (is::getSFMLObjX(rec) < _xSize)
+                        if (pos.x < _xSize)
                         {
                             _x = _xSize;
                             haveError = true;
                         }
-                        else if (is::getSFMLObjX(rec) > m_scene->getViewX() + m_scene->getViewW() / 2.f - _xSize)
+                        else if (pos.x > m_scene->getViewX() + m_scene->getViewW() / 2.f - _xSize)
                         {
                             haveError = true;
                             _x = m_scene->getViewX() + m_scene->getViewW() / 2.f - _xSize;
                         }
                         else xVar = _x;
 
-                        if (is::getSFMLObjY(rec) < m_scene->getViewY() + ((index == 0) ? 32.f : 4.f))
+                        if (pos.y < m_scene->getViewY() + ((index == 0) ? 32.f : 4.f))
                         {
                             _y = _ySize + 32.f;
                             haveError = true;
                         }
-                        else if (is::getSFMLObjY(rec) > m_scene->getViewY() + m_scene->getViewH() / 2.f - _ySize)
+                        else if (pos.y > m_scene->getViewY() + m_scene->getViewH() / 2.f - _ySize)
                         {
                             _y = m_scene->getViewY() + m_scene->getViewH() / 2.f - _ySize;
                             haveError = true;
@@ -409,18 +407,18 @@ void MenuController::step(float const &DELTA_TIME)
                 if (static_cast<int>(m_timeClick) == 0) m_scene->GSMplaySound("select_option"); // We play this sound
                 m_timeClick = 15.f;
                 if (m_scene->getGameSystem().m_padAlpha < 250) m_scene->getGameSystem().m_padAlpha += ((is::VALUE_CONVERSION * 2.f) * DELTA_TIME);
-                is::setSFMLObjTexRec(m_sprAddAlpha, 64, 0);
+                is::setSFMLObjTexRec(m_sprAddAlpha, 64, 0, 32, 32);
             }
-            else is::setSFMLObjTexRec(m_sprAddAlpha, 32, 0);
+            else is::setSFMLObjTexRec(m_sprAddAlpha, 32, 0, 32, 32);
 
             if (m_scene->mouseCollision(m_sprReduceAlpha) && m_scene->getGameSystem().isPressed())
             {
                 if (static_cast<int>(m_timeClick) == 0) m_scene->GSMplaySound("select_option"); // We play this sound
                 m_timeClick = 15.f;
                 if (m_scene->getGameSystem().m_padAlpha > 20) m_scene->getGameSystem().m_padAlpha -= ((is::VALUE_CONVERSION * 2.f) * DELTA_TIME);
-                is::setSFMLObjTexRec(m_sprReduceAlpha, 128, 0);
+                is::setSFMLObjTexRec(m_sprReduceAlpha, 128, 0, 32, 32);
             }
-            else is::setSFMLObjTexRec(m_sprReduceAlpha, 96, 0);
+            else is::setSFMLObjTexRec(m_sprReduceAlpha, 96, 0, 32, 32);
 
             if (m_scene->mouseCollision(m_sprPermuteAB) && m_scene->getGameSystem().isPressed() && static_cast<int>(m_timeClick) == 0)
             {
@@ -474,7 +472,7 @@ void MenuController::step(float const &DELTA_TIME)
     }
 }
 
-void MenuController::draw(sf::RenderTexture &surface)
+void MenuController::draw(is::Render &surface)
 {
     static_cast<CancelButton*>(m_scene->SDMgetObject("CancelButton"))->setVisible(m_pageName == PAGE_PAD_CONFIG);
 

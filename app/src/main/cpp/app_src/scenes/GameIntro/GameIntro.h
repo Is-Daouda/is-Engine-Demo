@@ -7,7 +7,7 @@
 class GameIntro : public is::GameDisplay
 {
 public:
-    GameIntro(sf::RenderWindow &window, sf::View &view, sf::RenderTexture &surface, is::GameSystemExtended &gameSysExt);
+    GameIntro(is::GameSystemExtended &gameSysExt);
 
     void loadResources();
 
@@ -26,10 +26,6 @@ public:
     // responsible for displaying the objects of the scene
     // for us.
     //////////////////////////////////////////////////////
-
-private:
-    sf::Font m_fontTitle;
-    sf::Texture m_texLogo, m_texPad;
 };
 
 #endif // GAMEINTRO_H_INCLUDED

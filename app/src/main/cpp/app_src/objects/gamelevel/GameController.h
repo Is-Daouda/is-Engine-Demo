@@ -27,10 +27,9 @@ class GameController : public is::MainObject
 public:
     bool m_timeUp = false;
     bool m_moveView = true;
-    sf::Texture &m_texEffect;
     is::GameTime m_gameTime;
 
-    GameController(int const &CURRENT_LEVEL, sf::Texture &texBonus, sf::Texture &texEffect, is::GameDisplay *scene);
+    GameController(int const &CURRENT_LEVEL, is::GameDisplay *scene);
     void step(float const &DELTA_TIME);
     void blockCollision(float const &DELTA_TIME);
     void levelSpecialAction();
@@ -47,10 +46,10 @@ public:
                 !m_launchTransition);
     }
     bool getCountLevelTime() {return m_countLevelTime;}
+    bool getPlayWarningSnd() {return m_playWarningSnd;}
 
 private:
     is::GameDisplay *m_scene;
-    sf::Texture &m_texBonus;
 
     int const &CURRENT_LEVEL;
     bool m_countLevelTime, m_playWarningSnd, m_launchTransition;

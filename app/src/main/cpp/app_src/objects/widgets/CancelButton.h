@@ -4,12 +4,12 @@
 #include "../../../isEngine/system/display/GameDisplay.h"
 #include "../../../isEngine/system/entity/parents/Visibilty.h"
 
-class CancelButton : public is::MainObject, public is::Visibility
+class CancelButton : public is::MainObject
 {
 public:
-    CancelButton(sf::Texture &tex, is::GameDisplay *scene);
+    CancelButton(is::GameDisplay *scene);
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
     bool isOn() const;
 
 private:

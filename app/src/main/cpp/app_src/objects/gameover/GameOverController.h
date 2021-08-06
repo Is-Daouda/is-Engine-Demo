@@ -16,9 +16,9 @@ public:
         CONTINUE,
         QUIT
     };
-    GameOverController(sf::Font &fontTitle, sf::Texture &texPad, is::GameDisplay *scene);
+    GameOverController(is::GameDisplay *scene);
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
 
 private:
     is::GameDisplay *m_scene;

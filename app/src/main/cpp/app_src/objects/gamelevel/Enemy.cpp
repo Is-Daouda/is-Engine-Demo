@@ -1,6 +1,6 @@
 #include "Enemy.h"
 
-Enemy::Enemy(sf::Texture &tex, EnemyType type, float x, float y, is::GameDisplay *scene):
+Enemy::Enemy(EnemyType type, float x, float y, is::GameDisplay *scene):
     MainObject(x, y),
     GroundDetection(),
     Type(type),
@@ -15,7 +15,11 @@ Enemy::Enemy(sf::Texture &tex, EnemyType type, float x, float y, is::GameDisplay
     m_strName = "Enemy";
     setRectangleMask(32, 32);
     m_xOffset = m_yOffset = 16.f;
-    is::createSprite(tex, m_sprParent, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
+
+    // We create the sprite of the object.
+    // On SDL this sprite will be blit (Useful for drawing a group of different objects whose
+    // sprites have the same textures. This makes the game more optimized).
+    scene->createSprite("enemy", *this, sf::IntRect(0, 0, 32, 32), sf::Vector2f(m_x, m_y), sf::Vector2f(16.f, 16.f));
 
     switch (m_type)
     {
@@ -52,8 +56,7 @@ void Enemy::step(float const &DELTA_TIME)
                                 // Star power
                                 if (player->getHaveStarPower() && placeMetting(0, 0, player))
                                 {
-                                    m_scene->SDMaddSceneObject(std::make_shared<Effect>(gameCtrl->m_texEffect,
-                                                                                         ((m_type == KOOPA_TROOPA) ? Effect::SCORE_200 : Effect::SCORE_100),
+                                    m_scene->SDMaddSceneObject(std::make_shared<Effect>(((m_type == KOOPA_TROOPA) ? Effect::SCORE_200 : Effect::SCORE_100),
                                                                                           getSpriteX(), m_y, m_scene));
                                     m_scene->GSMplaySound("stomp");
                                     m_isTouched = false;
@@ -90,8 +93,7 @@ void Enemy::step(float const &DELTA_TIME)
                                             {
                                                 case LITTLE_GOOMBA:
                                                     player->makeJump(2.f, static_cast<is::GameKeyData*>(m_scene->SDMgetObject("GameKeyData"))->m_keyAUsed);
-                                                    m_scene->SDMaddSceneObject(std::make_shared<Effect>(gameCtrl->m_texEffect, Effect::SCORE_100,
-                                                                                                          getSpriteX(), m_y, m_scene));
+                                                    m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::SCORE_100, getSpriteX(), m_y, m_scene));
                                                     m_scene->GSMplaySound("stomp");
                                                     m_isTouched = true;
                                                     m_isBeated = true;
@@ -102,8 +104,7 @@ void Enemy::step(float const &DELTA_TIME)
                                                     {
                                                         m_isTouched = true;
                                                         m_hsp = 0.f;
-                                                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(gameCtrl->m_texEffect, Effect::SCORE_100,
-                                                                                                           getSpriteX(), m_y, m_scene));
+                                                        m_scene->SDMaddSceneObject(std::make_shared<Effect>(Effect::SCORE_100, getSpriteX(), m_y, m_scene));
                                                         m_scene->GSMplaySound("stomp");
                                                         player->makeJump(2.f, static_cast<is::GameKeyData*>(m_scene->SDMgetObject("GameKeyData"))->m_keyAUsed);
                                                     }
@@ -163,8 +164,7 @@ void Enemy::step(float const &DELTA_TIME)
                                 if (placeMetting(0, 0, obj) && !obj->getCreateExplosion())
                                 {
                                     m_scene->GSMplaySound("stomp");
-                                    m_scene->SDMaddSceneObject(std::make_shared<Effect>(gameCtrl->m_texEffect,
-                                                                                         ((m_type == KOOPA_TROOPA) ? Effect::SCORE_200 : Effect::SCORE_100),
+                                    m_scene->SDMaddSceneObject(std::make_shared<Effect>(((m_type == KOOPA_TROOPA) ? Effect::SCORE_200 : Effect::SCORE_100),
                                                                                           getSpriteX(), m_y, m_scene));
                                     obj->createExplosion();
                                     m_isBeated = true;
@@ -277,10 +277,4 @@ void Enemy::step(float const &DELTA_TIME)
             centerCollisionMask(m_x + m_xOffset, m_y + 16.f);
         }
     }
-}
-
-void Enemy::draw(sf::RenderTexture &surface)
-{
-    // We draw the object only if it is in the field of vision of the scene view
-    if (m_scene->inViewRec(this)) surface.draw(m_sprParent);
 }

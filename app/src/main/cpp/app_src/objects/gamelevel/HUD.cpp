@@ -1,6 +1,6 @@
 #include "HUD.h"
 
-HUD::HUD(sf::Font const &fnt, sf::Texture &tex, is::GameDisplay *scene) :
+HUD::HUD(is::GameDisplay *scene) :
     m_scene(scene),
     m_score(0),
     m_timeScoreCount(0.f),
@@ -11,15 +11,15 @@ HUD::HUD(sf::Font const &fnt, sf::Texture &tex, is::GameDisplay *scene) :
     m_imageAlpha = 0;
 
     int const TXT_SIZE(20);
-    is::createText(fnt, m_txtScore,     " ", 0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
-    is::createText(fnt, m_txtLevelTime, " ", 0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
-    is::createText(fnt, m_txtBonus,     " ", 0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
-    is::createText(fnt, m_txtWorld,
-                   "WORLD\n\t" +
+    is::createText(scene->getFontSystem(), m_txtScore,     " ", 0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
+    is::createText(scene->getFontSystem(), m_txtLevelTime, " ", 0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
+    is::createText(scene->getFontSystem(), m_txtBonus,     " ", 0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
+    is::createText(scene->getFontSystem(), m_txtWorld,
+                   "WORLD  \n   " +
                     is::numToStr((m_scene->getGameSystem().m_currentLevel + 1) % 8) + " - " +
                     is::numToStr(m_scene->getGameSystem().m_currentLevel + 1),
                     0.f, 0.f, sf::Color(255, 255, 255, 255), TXT_SIZE);
-    is::createSprite(tex, m_sprParent, sf::IntRect(0, 32, 32, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f));
+    is::createSprite(m_scene->GRMgetTexture("bonus"), m_sprParent, sf::IntRect(0, 32, 32, 32), sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f));
     is::setSFMLObjScale(m_sprParent, 0.5f);
 }
 
@@ -46,7 +46,13 @@ void HUD::step(float const &DELTA_TIME)
     is::setSFMLObjX_Y(m_txtScore, m_scene->getViewX() - 270.f, (m_scene->getViewY() - m_scene->getViewH() / 2.f) + TXT_Y_POS);
 
     m_txtBonus.setString("x " + is::writeZero(m_scene->getGameSystem().m_currentBonus));
-    is::setSFMLObjX_Y(m_sprParent, m_scene->getViewX() - 110.f, (m_scene->getViewY() - (m_scene->getViewH() / 2.f) + TXT_Y_POS) + 28.f);
+    is::setSFMLObjX_Y(m_sprParent, m_scene->getViewX() - 110.f, (m_scene->getViewY() - (m_scene->getViewH() / 2.f) + TXT_Y_POS) +
+                  #if defined(IS_ENGINE_SDL_2)
+                      33.f
+                  #else
+                      28.f
+                  #endif
+                      );
     is::setSFMLObjX_Y(m_txtBonus, m_scene->getViewX() - 90.f, (m_scene->getViewY() -  (m_scene->getViewH() / 2.f) + TXT_Y_POS) + 22.f);
 
     // coin animation
@@ -61,7 +67,7 @@ void HUD::step(float const &DELTA_TIME)
     is::setSFMLObjX_Y(m_txtLevelTime, m_scene->getViewX() + 180.f, (m_scene->getViewY() - m_scene->getViewH() / 2.f) + TXT_Y_POS);
 }
 
-void HUD::draw(sf::RenderTexture &surface)
+void HUD::draw(is::Render &surface)
 {
     if (m_scene->getIsPlaying())
     {

@@ -11,7 +11,7 @@
 class PauseOption : public is::MainObject
 {
 public:
-    PauseOption(is::GameDisplay *scene, sf::Texture &texIcon, sf::Texture &texPad);
+    PauseOption(is::GameDisplay *scene);
 
     ////////////////////////////////////////////////////////////
     /// \brief Enum represents a option of the pause menu
@@ -26,7 +26,7 @@ public:
     bool m_keyIsLocked, m_useMoveAnimation, m_mouseInCollison;
 
     void step(float const &DELTA_TIME);
-    void draw(sf::RenderTexture &surface);
+    void draw(is::Render &surface);
 
 private:
     is::GameDisplay *m_scene;

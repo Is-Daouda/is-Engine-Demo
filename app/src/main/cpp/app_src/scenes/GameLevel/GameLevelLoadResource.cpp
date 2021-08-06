@@ -4,12 +4,11 @@ void GameLevel::loadResources()
 {
     GameDisplay::loadParentResources();
 
-    is::loadSFMLObjResource(m_texToolsPad, is::GameConfig::GUI_DIR + "tools_pad.png");
-    is::loadSFMLObjResource(m_texJoystick, is::GameConfig::GUI_DIR + "game_pad.png");
-    is::loadSFMLObjResource(m_texIcoMenuBtn, is::GameConfig::GUI_DIR + "ico_button.png");
+    GRMaddTexture("tools_pad", is::GameConfig::GUI_DIR + "tools_pad.png");
+    GRMaddTexture("ico_button", is::GameConfig::GUI_DIR + "ico_button.png");
 
     auto gameKey = std::make_shared<is::GameKeyData>(this);
-    gameKey->loadResources(m_texJoystick);
+    gameKey->loadResources();
     gameKey->setDepth(-9);
 
     // We add the object to the SDM container but we order it to display it only
@@ -22,7 +21,7 @@ void GameLevel::loadResources()
     GSMaddSound("break_block", is::GameConfig::SFX_DIR + "break_block.wav");
     GSMaddSound("bump", is::GameConfig::SFX_DIR + "bump.wav");
     GSMaddSound("coin", is::GameConfig::SFX_DIR + "coin.wav");
-    GSMaddSound("fireball", is::GameConfig::SFX_DIR + "fireball.ogg");
+    GSMaddSound("fireball", is::GameConfig::SFX_DIR + "fireball.wav");
     GSMaddSound("flagpole", is::GameConfig::SFX_DIR + "flagpole.wav");
     GSMaddSound("jump_small", is::GameConfig::SFX_DIR + "jump_small.wav");
     GSMaddSound("jump_super", is::GameConfig::SFX_DIR + "jump_super.wav");
@@ -36,42 +35,42 @@ void GameLevel::loadResources()
     GSMaddSound("warning", is::GameConfig::SFX_DIR + "warning.wav");
     GSMaddSound("stage_clear", is::GameConfig::SFX_DIR + "stage_clear.wav");
     GSMaddSound("score_count", is::GameConfig::SFX_DIR + "score_count.wav");
-    GSMgetSound("score_count")->setLoop(true);
+    GSMsetSoundLoop("score_count", true);
 
     // GUI resources
-    is::loadSFMLObjResource(m_texPad, is::GameConfig::GUI_DIR + "option_pad.png");
-    is::loadSFMLObjResource(m_texDialog, is::GameConfig::GUI_DIR + "dialog_box.png");
-    is::createSprite(m_texPad, m_sprButtonSelect, sf::IntRect(160, 0, 160, 32), sf::Vector2f(0.f, 0.f) , sf::Vector2f(80.f, 16.f));
+    auto &texPad = GRMaddTexture("option_pad", is::GameConfig::GUI_DIR + "option_pad.png");
+    auto &texDialog = GRMaddTexture("dialog_box", is::GameConfig::GUI_DIR + "dialog_box.png");
+    is::createSprite(texPad, m_sprButtonSelect, sf::IntRect(160, 0, 160, 32), sf::Vector2f(0.f, 0.f) , sf::Vector2f(80.f, 16.f));
 
     // tiles
-    is::loadSFMLObjResource(m_texTile, is::GameConfig::TILES_DIR + "tileset.png");
+    GRMaddTexture("tileset", is::GameConfig::TILES_DIR + "tileset.png");
 
     // sprites
-    is::loadSFMLObjResource(m_texPlayer, is::GameConfig::SPRITES_DIR + "player.png");
-    is::loadSFMLObjResource(m_texBonus,  is::GameConfig::SPRITES_DIR + "bonus.png");
-    is::loadSFMLObjResource(m_texEnemy,  is::GameConfig::SPRITES_DIR + "enemy.png");
-    is::loadSFMLObjResource(m_texFire,   is::GameConfig::SPRITES_DIR + "fire.png");
-    is::loadSFMLObjResource(m_texEffect, is::GameConfig::SPRITES_DIR + "effect.png");
+    GRMaddTexture("player", is::GameConfig::SPRITES_DIR + "player.png");
+    GRMaddTexture("bonus",  is::GameConfig::SPRITES_DIR + "bonus.png");
+    GRMaddTexture("enemy",  is::GameConfig::SPRITES_DIR + "enemy.png");
+    GRMaddTexture("fire",   is::GameConfig::SPRITES_DIR + "fire.png");
+    GRMaddTexture("effect", is::GameConfig::SPRITES_DIR + "effect.png");
 
     // creation of the object which manages the level
     // but avoid the SDM drawing it
-    auto gameCtrl = std::make_shared<GameController>(CURRENT_LEVEL, m_texBonus, m_texEffect, this);
+    auto gameCtrl = std::make_shared<GameController>(CURRENT_LEVEL, this);
     SDMaddSceneObject(gameCtrl, true, false);
 
-    auto gameDialog = std::make_shared<is::GameDialog>(m_texDialog, m_fontSystem, this);
+    auto gameDialog = std::make_shared<is::GameDialog>(texDialog, getFontSystem(), this);
     gameDialog->setDepth(-8);
 
     // We add the GameDialog object in the SDM container but the SDM will not update it.
     // The GameController object will take care of updating it in its step()
     SDMaddSceneObject(gameDialog, false, true);
 
-    auto player = std::make_shared<Player>(m_texPlayer, m_texFire, gameCtrl->m_timeUp, this);
+    auto player = std::make_shared<Player>(gameCtrl->m_timeUp, this);
     SDMaddSceneObject(player); // We add the object in the SDM container
 
-    auto gameHud = std::make_shared<HUD>(m_fontSystem, m_texBonus, this);
+    auto gameHud = std::make_shared<HUD>(this);
     SDMaddSceneObject(gameHud); // We add the object in the SDM container
 
-    SDMaddSceneObject(std::make_shared<CancelButton>(m_texToolsPad, this)); // We add the object in the SDM container
+    SDMaddSceneObject(std::make_shared<CancelButton>(this)); // We add the object in the SDM container
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                      LEVEL INTERPRETER
@@ -117,37 +116,37 @@ void GameLevel::loadResources()
 //                                      BLOCK
 //////////////////////////////////////////////////////////////////////////////////////////////////////
         if (mapIndex[dataIndex] == 0) // block mask
-            SDMaddSceneObject(std::make_shared<Block>(nullptr, Block::BlockType::BLOCK_INVISIBLE, 32.f * j, 32.f * i, this), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_INVISIBLE, 32.f * j, 32.f * i, this), false, true);
         else if (mapIndex[dataIndex] == 1) // block world 1-1
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_DESTRUCTIBLE, 32.f * j, 32.f * i, this, 2.f), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_DESTRUCTIBLE, 32.f * j, 32.f * i, this, 2.f), false, true);
         else if (mapIndex[dataIndex] == 2) // block underground
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_DESTRUCTIBLE, 32.f * j, 32.f * i, this, 3.f), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_DESTRUCTIBLE, 32.f * j, 32.f * i, this, 3.f), false, true);
         else if (mapIndex[dataIndex] == 3) // block coin
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_COIN, 32.f * j, 32.f * i, this), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_COIN, 32.f * j, 32.f * i, this), false, true);
         else if (mapIndex[dataIndex] == 4) // block with multiple coins
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_MULTI_COIN, 32.f * j, 32.f * i, this), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_MULTI_COIN, 32.f * j, 32.f * i, this), false, true);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                      BONUS
 //////////////////////////////////////////////////////////////////////////////////////////////////////
         else if (mapIndex[dataIndex] == 100) // Coin
-            SDMaddSceneObject(std::make_shared<Bonus>(m_texBonus, Bonus::BonusType::COIN, 32.f * j, 32.f * i, this));
+            SDMaddSceneObject(std::make_shared<Bonus>(Bonus::BonusType::COIN, 32.f * j, 32.f * i, this));
         else if (mapIndex[dataIndex] == 101) // Mushroom / Fire Flower
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_MUSHROOM, 32.f * j, 32.f * i, this), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_MUSHROOM, 32.f * j, 32.f * i, this), false, true);
         else if (mapIndex[dataIndex] == 102) // Life
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_MUSHROOM_1UP, 32.f * j, 32.f * i, this), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_MUSHROOM_1UP, 32.f * j, 32.f * i, this), false, true);
         else if (mapIndex[dataIndex] == 103) // Starman
-            SDMaddSceneObject(std::make_shared<Block>(&m_texTile, Block::BlockType::BLOCK_STARMAN, 32.f * j, 32.f * i, this), false, true);
+            SDMaddSceneObject(std::make_shared<Block>(Block::BlockType::BLOCK_STARMAN, 32.f * j, 32.f * i, this), false, true);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                      ENEMY
 //////////////////////////////////////////////////////////////////////////////////////////////////////
         else if (mapIndex[dataIndex] == 200)
-            SDMaddSceneObject(std::make_shared<Enemy>(m_texEnemy, Enemy::EnemyType::LITTLE_GOOMBA, 32.f * j, 32.f * i, this));
+            SDMaddSceneObject(std::make_shared<Enemy>(Enemy::EnemyType::LITTLE_GOOMBA, 32.f * j, 32.f * i, this));
         else if (mapIndex[dataIndex] == 201)
-            SDMaddSceneObject(std::make_shared<Enemy>(m_texEnemy, Enemy::EnemyType::KOOPA_TROOPA, 32.f * j, 32.f * i, this));
+            SDMaddSceneObject(std::make_shared<Enemy>(Enemy::EnemyType::KOOPA_TROOPA, 32.f * j, 32.f * i, this));
         else if (mapIndex[dataIndex] == 202)
-            SDMaddSceneObject(std::make_shared<Enemy>(m_texEnemy, Enemy::EnemyType::PIRANA_PLANT, 32.f * j, 32.f * i, this));
+            SDMaddSceneObject(std::make_shared<Enemy>(Enemy::EnemyType::PIRANA_PLANT, 32.f * j, 32.f * i, this));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                      PLAYER
@@ -163,7 +162,7 @@ void GameLevel::loadResources()
         else if (mapIndex[dataIndex] == 400) // limit the movement of the view
             SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::VIEW_CONTROLLER, 32.f * j, 32.f * i, this));
         else if (mapIndex[dataIndex] == 401) // finish level
-            SDMaddSceneObject(std::make_shared<FinishObject>(m_texTile, 32.f * j, 32.f * i, this));
+            SDMaddSceneObject(std::make_shared<FinishObject>(32.f * j, 32.f * i, this));
         else if (mapIndex[dataIndex] == 402) // the entrance of the first tunnel
             SDMaddSceneObject(std::make_shared<SpecialObject>(SpecialObject::ENTER_TUNNEL_A, 32.f * j, 32.f * i, this));
         else if (mapIndex[dataIndex] == 403) // exit of the first tunnel
@@ -223,35 +222,15 @@ void GameLevel::loadResources()
     }
     while (mapIndex[dataIndex] != 1003); // read values in array (1003 = end of tile map)
 
-    // level information
-    is::showLog("\nLevel           : " + is::numToStr(CURRENT_LEVEL + 1) +
-                "\nInstance Number : " + is::numToStr(is::MainObject::instanceNumber) +
-                "\nLevel Width     : " + is::numToStr(m_sceneWidth  * 32) + " (" + is::numToStr(m_sceneWidth) + ")" +
-                "\nLevel Height    : " + is::numToStr(m_sceneHeight * 32) + " (" +is::numToStr(m_sceneHeight) + ")" +
-                "\nLevel Time      : " + is::numToStr(gameCtrl->m_gameTime.getMinute()) + "min : "
-                                       + is::numToStr(gameCtrl->m_gameTime.getSecond()) + "s" +
-                "\n");
-
-    // create the tile map with vertex array
-    unsigned int valX(0), valY(0);
-    int const bgSize(35); // size of vertex array
-    bool stop(false);
-
-    while (!stop)
+    // create the tile map with vector array
+    for (unsigned int i = 0; i < m_sceneWidth; ++i)
     {
-        auto tile = std::make_shared<LevelTile>(m_texTile, this);
-        tile->loadResources(sf::Vector2u(32, 32), backTileValue, m_sceneWidth, m_sceneHeight, valX, valY, bgSize, stop);
-        tile->setDepth(is::DepthObject::BIG_DEPTH);
-        SDMaddSceneObject(tile, false, true, "LevelTile"); // We add the object in the SDM container
-    }
-    for (std::list<std::shared_ptr<is::MainObject>>::iterator it = m_SDMsceneObjects.begin();
-         it != m_SDMsceneObjects.end(); ++it)
-    {
-        if (it->get()->getName() == "LevelTile")
+        for (unsigned int j = 0; j < m_sceneHeight; ++j)
         {
-            if (!static_cast<LevelTile*>(it->get())->hasTile())
+            // we get the current tile number
+            if (backTileValue[i + j * m_sceneWidth] != 999) // is not an empty space
             {
-                it->reset();
+                SDMaddSceneObject(std::make_shared<Tiles>(backTileValue[i + j * m_sceneWidth], 32.f * i, 32.f * j, this), false, true);
             }
         }
     }
@@ -274,18 +253,29 @@ void GameLevel::loadResources()
         m_viewY = static_cast<float>(m_sceneHeight) * 32.f - m_viewH / 2;
 
     // We add the object in the SDM container, but avoid SDM updating it
-    SDMaddSceneObject(std::make_shared<PauseOption>(this, m_texIcoMenuBtn, m_texPad), false);
+    SDMaddSceneObject(std::make_shared<PauseOption>(this), false);
 
     // set HUD position
     gameHud->setPosition(m_viewX, m_viewY);
 
     // load level music
     GSMaddMusic("world_1", is::GameConfig::MUSIC_DIR + "world_1.ogg");
-    GSMgetMusic("world_1")->setLoop(true);
+    GSMsetMusicLoop("world_1", true);
+    GSMaddMusic("world_1_hurry_up", is::GameConfig::MUSIC_DIR + "world_1_hurry_up.ogg");
+    GSMsetMusicLoop("world_1_hurry_up", true);
     GSMaddMusic("underground", is::GameConfig::MUSIC_DIR + "underground.ogg");
-    GSMgetMusic("underground")->setLoop(true);
+    GSMsetMusicLoop("underground", true);
     GSMaddMusic("starman", is::GameConfig::MUSIC_DIR + "starman.ogg");
 
     // Add Start Transition object
-    SDMaddSceneObject(std::make_shared<StartTransition>(m_texPlayer, this));
+    SDMaddSceneObject(std::make_shared<StartTransition>(this));
+
+    // level information
+    is::showLog("\nLevel           : " + is::numToStr(CURRENT_LEVEL + 1) +
+                "\nInstance Number : " + is::numToStr(is::MainObject::instanceNumber) +
+                "\nLevel Width     : " + is::numToStr(m_sceneWidth  * 32) + " (" + is::numToStr(m_sceneWidth) + ")" +
+                "\nLevel Height    : " + is::numToStr(m_sceneHeight * 32) + " (" +is::numToStr(m_sceneHeight) + ")" +
+                "\nLevel Time      : " + is::numToStr(gameCtrl->m_gameTime.getMinute()) + "min : "
+                                       + is::numToStr(gameCtrl->m_gameTime.getSecond()) + "s" +
+                "\n");
 }
