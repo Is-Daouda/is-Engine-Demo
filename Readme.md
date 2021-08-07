@@ -1,5 +1,5 @@
 # is::Engine (Infinity Solutions::Engine) 3.3.3 Demo
-- This Demo is about an iconic game that marked a whole generation and which celebrates its **35th anniversary** this year: It's **Super Mario Bros NES**!
+- This Demo is about an iconic game that marked a whole generation and which celebrates its **35th anniversary**: It's **Super Mario Bros NES**!
 - It comes with a **[Level Editor](https://github.com/Is-Daouda/is-Engine-Level-Editor)** that allows you to create your own levels and integrate them into the game.
 
 ![image](./images/demo_screen.png)
