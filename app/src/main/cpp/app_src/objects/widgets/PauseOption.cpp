@@ -166,10 +166,9 @@ void PauseOption::step(float const &DELTA_TIME)
     is::setSFMLObjX_Y(m_sprPad3, m_scene->getViewX() - (160.f - m_pauseObjMove), m_scene->getViewY());
     if (!m_useMoveAnimation) is::setSFMLObjX_Y(m_scene->getSprButtonSelect(), m_scene->getViewX() + m_pauseObjMove, m_scene->getViewY());
 
-    float const TXT_Y_POS(6.f);
-    is::setSFMLObjX_Y(m_txtContinue, is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1) - TXT_Y_POS);
-    is::setSFMLObjX_Y(m_txtRestart, is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2) - TXT_Y_POS);
-    is::setSFMLObjX_Y(m_txtQuit, is::getSFMLObjX(m_sprPad3), is::getSFMLObjY(m_sprPad3) - TXT_Y_POS);
+    is::setSFMLObjX_Y(m_txtContinue, is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1));
+    is::setSFMLObjX_Y(m_txtRestart, is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2));
+    is::setSFMLObjX_Y(m_txtQuit, is::getSFMLObjX(m_sprPad3), is::getSFMLObjY(m_sprPad3));
 
     is::setSFMLObjX_Y(m_recPauseBG, m_scene->getViewX(), m_scene->getViewY());
 

@@ -46,13 +46,7 @@ void HUD::step(float const &DELTA_TIME)
     is::setSFMLObjX_Y(m_txtScore, m_scene->getViewX() - 270.f, (m_scene->getViewY() - m_scene->getViewH() / 2.f) + TXT_Y_POS);
 
     m_txtBonus.setString("x " + is::writeZero(m_scene->getGameSystem().m_currentBonus));
-    is::setSFMLObjX_Y(m_sprParent, m_scene->getViewX() - 110.f, (m_scene->getViewY() - (m_scene->getViewH() / 2.f) + TXT_Y_POS) +
-                  #if defined(IS_ENGINE_SDL_2)
-                      33.f
-                  #else
-                      28.f
-                  #endif
-                      );
+    is::setSFMLObjX_Y(m_sprParent, m_scene->getViewX() - 110.f, (m_scene->getViewY() - (m_scene->getViewH() / 2.f) + TXT_Y_POS) + 28.f);
     is::setSFMLObjX_Y(m_txtBonus, m_scene->getViewX() - 90.f, (m_scene->getViewY() -  (m_scene->getViewH() / 2.f) + TXT_Y_POS) + 22.f);
 
     // coin animation

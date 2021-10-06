@@ -2,50 +2,45 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="is-Engine-linux" />
+		<Option title="is-Engine-linux-SDL2" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin-codeblocks/Debug/is-Engine-linux" prefix_auto="1" extension_auto="1" />
+				<Option output="bin-codeblocks/Debug/is-Engine-linux-SDL2" prefix_auto="1" extension_auto="1" />
 				<Option object_output="bin-codeblocks/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-std=c++17" />
 					<Add option="-g" />
 				</Compiler>
-				<Linker>
-					<Add library="sfml-audio" />
-					<Add library="sfml-network" />
-					<Add library="sfml-graphics" />
-					<Add library="sfml-window" />
-					<Add library="sfml-system" />
-				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin-codeblocks/Release/is-Engine-linux" prefix_auto="1" extension_auto="1" />
+				<Option output="bin-codeblocks/Release/is-Engine-linux-SDL2" prefix_auto="1" extension_auto="1" />
 				<Option object_output="bin-codeblocks/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-std=c++17" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="sfml-audio" />
-					<Add library="sfml-network" />
-					<Add library="sfml-graphics" />
-					<Add library="sfml-window" />
-					<Add library="sfml-system" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-std=c++17" />
+			<Add option="`sdl2-config --cflags`" />
+			<Add option="-DIS_ENGINE_SDL_2" />
+			<Add option="-DIS_ENGINE_LINUX" />
 		</Compiler>
+		<Linker>
+			<Add option="`sdl2-config --libs`" />
+			<Add library="SDL2_image" />
+			<Add library="SDL2_mixer" />
+			<Add library="SDL2_ttf" />
+		</Linker>
 		<Unit filename="cpp/app_src/activity/GameActivity.h" />
 		<Unit filename="cpp/app_src/config/ExtraConfig.h" />
 		<Unit filename="cpp/app_src/config/GameConfig.h" />

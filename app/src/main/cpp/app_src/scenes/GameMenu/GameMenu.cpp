@@ -64,7 +64,7 @@ void GameMenu::SDMmanageSceneMsgAnswers()
                 m_gameSysExt.initProgress();
                 m_gameSysExt.saveData(is::GameConfig::GAME_DATA_FILE);
                 m_gameSysExt.m_launchOption = is::DisplayOption::GAME_LEVEL;
-                m_isClose = true;
+                m_isClosed = true;
             }
             else m_waitTime = 20;
         }

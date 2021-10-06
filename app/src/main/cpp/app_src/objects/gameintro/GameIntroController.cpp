@@ -25,7 +25,7 @@ GameIntroController::GameIntroController(is::GameDisplay *scene):
 
     if (m_scene->getGameSystem().m_firstLaunch)
     {
-        is::createText(m_scene->GRMgetFont("font_title"), m_txtChooseLanguage, "Choose Language", m_scene->getViewX(), m_scene->getViewY() - 74.f, sf::Color::White, true, 48);
+        is::createText(m_scene->GRMgetFont("font_title"), m_txtChooseLanguage, "Choose Language", m_scene->getViewX(), m_scene->getViewY() - 64.f, sf::Color::White, true, 48);
         is::createSprite(texPad, m_sprButtonSelect, sf::IntRect(0, 0, 90, 96), sf::Vector2f(m_scene->getViewX() - 64.f, m_scene->getViewY() + 28.f), sf::Vector2f(45.f, 48.f));
         is::createSprite(texPad, m_sprPadFr, sf::IntRect(90, 0, 90, 96), sf::Vector2f(m_scene->getViewX() + 64.f, m_scene->getViewY() + 28.f), sf::Vector2f(45.f, 48.f));
         m_openLanguageMenu = true;

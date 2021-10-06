@@ -32,8 +32,8 @@ GameOverController::GameOverController(is::GameDisplay *scene) :
     is::createText(m_scene->getFontSystem(), m_txtQuitGame, is::lang::pad_quit_game[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f);
     is::centerSFMLObj(m_txtRestartGame);
     is::centerSFMLObj(m_txtQuitGame);
-    is::setSFMLObjX_Y(m_txtRestartGame, is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1) - 6.f);
-    is::setSFMLObjX_Y(m_txtQuitGame, is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2) - 6.f);
+    is::setSFMLObjX_Y(m_txtRestartGame, is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1));
+    is::setSFMLObjX_Y(m_txtQuitGame, is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2));
 
     // Choose the option quit by default for the Game End Screen
     if (m_sceneIndex == is::DisplayOption::GAME_END_SCREEN) m_scene->setOptionIndex(QUIT);
@@ -53,7 +53,7 @@ void GameOverController::step(float const &DELTA_TIME)
         !m_scene->getGameSystem().isPressed())
             m_scene->getGameSystem().m_keyIsPressed = false;
 
-    if (!m_scene->m_isClose)
+    if (!m_scene->m_isClosed)
     {
         // change option with mouse (touch on Android)
         if (m_scene->mouseCollision(m_sprPad1) && m_scene->getOptionIndex() != CONTINUE &&
@@ -101,7 +101,7 @@ void GameOverController::step(float const &DELTA_TIME)
                 m_scene->getGameSystem().m_launchOption = is::DisplayOption::MAIN_MENU;
             break;
             }
-            m_scene->m_isClose = true;
+            m_scene->m_isClosed = true;
         }
     }
 
@@ -115,7 +115,7 @@ void GameOverController::step(float const &DELTA_TIME)
     // text animation
     is::scaleAnimation(DELTA_TIME, m_imageScale, m_txtGetEditor);
 
-    if (m_scene->m_isClose) m_scene->setIsRunning(false);
+    if (m_scene->m_isClosed) m_scene->setIsRunning(false);
 }
 
 void GameOverController::draw(is::Render &surface)

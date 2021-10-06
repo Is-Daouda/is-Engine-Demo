@@ -30,14 +30,13 @@ MenuController::MenuController(is::GameDisplay *scene):
     is::setSFMLObjScaleX_Y(m_sprPad3, 1.f, btYSize);
 
     // create text for main menu
-    float const TXT_Y_ON_BT(8.f);
     int const _PAD_TXT_SIZE(22);
     is::createText(m_scene->getFontSystem(), m_txtStartGame, is::lang::pad_new_game[m_scene->getGameSystem().m_gameLanguage],
-                   is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1) - TXT_Y_ON_BT, sf::Color::Blue, true, _PAD_TXT_SIZE);
+                   is::getSFMLObjX(m_sprPad1), is::getSFMLObjY(m_sprPad1), sf::Color::Blue, true, _PAD_TXT_SIZE);
     is::createText(m_scene->getFontSystem(), m_txtContinue, is::lang::pad_continue_game[m_scene->getGameSystem().m_gameLanguage],
-                   is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2) - TXT_Y_ON_BT, true, _PAD_TXT_SIZE);
+                   is::getSFMLObjX(m_sprPad2), is::getSFMLObjY(m_sprPad2), true, _PAD_TXT_SIZE);
     is::createText(m_scene->getFontSystem(), m_txtPadConfig, is::lang::pad_controller[m_scene->getGameSystem().m_gameLanguage],
-                   is::getSFMLObjX(m_sprPad3), is::getSFMLObjY(m_sprPad3) - TXT_Y_ON_BT, sf::Color(0, 0, 0), _PAD_TXT_SIZE);
+                   is::getSFMLObjX(m_sprPad3), is::getSFMLObjY(m_sprPad3), sf::Color(0, 0, 0), _PAD_TXT_SIZE);
     is::centerSFMLObj(m_txtPadConfig);
 
     // create text for game option
@@ -68,25 +67,25 @@ MenuController::MenuController(is::GameDisplay *scene):
     is::setSFMLObjX_Y(m_sprPermuteAB, m_scene->getViewX() - _xPos - 20.f, m_scene->getViewY() - 80.f);
     is::createText(m_scene->getFontSystem(), m_txtPermuteAB, is::lang::msg_permute_AB[m_scene->getGameSystem().m_gameLanguage] + getABPlace(), 0.f, 0.f, sf::Color(255, 255, 255));
     is::centerSFMLObj(m_txtPermuteAB);
-    is::setSFMLObjX_Y(m_txtPermuteAB, is::getSFMLObjX(m_sprPermuteAB), is::getSFMLObjY(m_sprPermuteAB) - TXT_Y_ON_BT + 1.f);
+    is::setSFMLObjX_Y(m_txtPermuteAB, is::getSFMLObjX(m_sprPermuteAB), is::getSFMLObjY(m_sprPermuteAB));
 
     is::createText(m_scene->getFontSystem(), m_txtMovePad, is::lang::msg_how_move_control[m_scene->getGameSystem().m_gameLanguage], 0.f, 0.f, sf::Color(255, 255, 255, 80));
     is::centerSFMLObj(m_txtMovePad);
     is::setSFMLObjX_Y(m_txtMovePad, m_scene->getViewX(), m_scene->getViewY());
 
-    is::createText(m_scene->getFontSystem(), m_txtSetAlpha, "Transparence", m_scene->getViewX() + _xPos, m_scene->getViewY() - 85.f, true, 20);
+    is::createText(m_scene->getFontSystem(), m_txtSetAlpha, "Transparence", m_scene->getViewX() + _xPos, is::getSFMLObjY(m_sprPermuteAB), true, 20);
     is::setSFMLObjFillColor(m_txtSetAlpha, sf::Color::White);
 
-    float const _DIST(65.f);
+    float const _DIST(80.f);
     is::createSprite(m_scene->GRMgetTexture("tools_pad"), m_sprAddAlpha, sf::IntRect(32, 0, 32, 32),
-                     sf::Vector2f(is::getSFMLObjX(m_txtSetAlpha) + _DIST, is::getSFMLObjY(m_txtSetAlpha) - 10.f), sf::Vector2f(16.f, 16.f));
+                     sf::Vector2f(is::getSFMLObjX(m_txtSetAlpha) + _DIST, is::getSFMLObjY(m_txtSetAlpha)), sf::Vector2f(16.f, 16.f));
     is::createSprite(m_scene->GRMgetTexture("tools_pad"), m_sprReduceAlpha, sf::IntRect(96, 0, 32, 32),
-                     sf::Vector2f(is::getSFMLObjX(m_txtSetAlpha) - _DIST - 32.f, is::getSFMLObjY(m_txtSetAlpha) - 10.f), sf::Vector2f(16.f, 16.f));
+                     sf::Vector2f(is::getSFMLObjX(m_txtSetAlpha) - _DIST, is::getSFMLObjY(m_txtSetAlpha)), sf::Vector2f(16.f, 16.f));
     is::createSprite(m_scene->GRMgetTexture("game_pad"), m_sprJoystick[0], sf::IntRect(0, 0, 134, 134), sf::Vector2f(0.f, 0.f), sf::Vector2f(67.f, 67.f));
     is::createSprite(m_scene->GRMgetTexture("game_pad"), m_sprJoystick[1], sf::IntRect(134, ((!m_scene->getGameSystem().m_permutePadAB) ? 0 : 67), 144, 67), sf::Vector2f(0.f, 0.f), sf::Vector2f(72.f, 37.f));
     is::createRectangle(m_recLine, sf::Vector2f(650.f, 1.5f), sf::Color::White, m_scene->getViewX(), m_scene->getViewY() - 34.f, true);
     is::createRectangle(m_recSelectPad, sf::Vector2f(134.f, 134.f), sf::Color::Transparent, 0.f, 0.f, true);
-    is::setSFMLObjOutlineColor(m_recSelectPad, 1.f, sf::Color::Red);
+    is::setSFMLObjOutlineColor(m_recSelectPad, sf::Color::Red, 1.f);
 
     is::createRectangle(m_recCfgBg, sf::Vector2f(m_scene->getViewW() + 10.f, m_scene->getViewH() + 10.f), sf::Color(0, 0, 0, 230), m_scene->getViewX(), m_scene->getViewY(), true);
 }
@@ -94,7 +93,7 @@ MenuController::MenuController(is::GameDisplay *scene):
 void MenuController::step(float const &DELTA_TIME)
 {
     // m_isClose allow to deactivate scene object
-    if (!m_scene->m_isClose)
+    if (!m_scene->m_isClosed)
     {
         // check with collision with sprite
         auto cancelBt = m_scene->SDMgetObject("CancelButton");
@@ -164,7 +163,7 @@ void MenuController::step(float const &DELTA_TIME)
                         playSelectSnd();
                         m_scene->getGameSystem().saveData(is::GameConfig::GAME_DATA_FILE);
                         m_scene->getGameSystem().m_launchOption = is::DisplayOption::GAME_LEVEL;
-                        m_scene->m_isClose = true;
+                        m_scene->m_isClosed = true;
                     }
                     else
                     {
@@ -180,7 +179,7 @@ void MenuController::step(float const &DELTA_TIME)
                         m_scene->getGameSystem().useVibrate(m_scene->getVibrateTimeDuration());
                         m_scene->getGameSystem().m_currentLevel = m_scene->getGameSystem().m_gameProgression;
                         m_scene->getGameSystem().m_launchOption = is::DisplayOption::GAME_LEVEL;
-                        m_scene->m_isClose = true;
+                        m_scene->m_isClosed = true;
                     }
                 break;
 
@@ -192,7 +191,7 @@ void MenuController::step(float const &DELTA_TIME)
                     playSelectSnd();
                     m_scene->getGameSystem().m_keyIsPressed = true;
                     m_pageName = PAGE_PAD_CONFIG;
-                    #endif // defined
+                    #endif
                 break;
                 }
                 m_scene->setKeyBackPressed(false);
@@ -465,7 +464,7 @@ void MenuController::step(float const &DELTA_TIME)
     is::scaleAnimation(DELTA_TIME, m_scene->getSprButtonSelectScale(), m_scene->getSprButtonSelect(), m_sprPad1.getScale().x);
     is::scaleAnimation(DELTA_TIME, m_scene->getSprButtonSelectScale(), m_sprPermuteAB, 1);
 
-    if (m_scene->m_isClose)
+    if (m_scene->m_isClosed)
     {
         m_scene->setSceneStart(false);
         m_scene->setIsRunning(false);
