@@ -274,9 +274,22 @@ codeblocks "./app/src/main/is-Engine-linux.cbp"
 2. Download this [version of SDL 2](https://github.com/Is-Daouda/SDL2) and extract it in **C:/ (C:/SDL2)**.
 3. Put the **.dll files** which is in the **bin** folder of SDL2 in the **[main](./app/src/main/)** folder.
 
+#### Linux
+1. Download Code::Blocks 20.03 and install it.
+2. Ensure the GCC Toolchain is installed (**sudo apt install build-essential**).
+3. Run **sudo apt install libsdl2-2.0-0 libsdl2-gfx-1.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-net-2.0-0 libsdl2-ttf-2.0-0** to install all SDL 2 libraries.
+
 **2. Opening the project with the IDE:**
+#### Windows
 1. Run the file **open_codeblocks_sdl.bat** in the main directory *(Make sure you have included the path to the Code::Blocks executable in your PATH environment variable)*.
 2. Or open the file **is-Engine-windows-SDL2.cbp** in the location **[is-Engine-Demo/app/src/main](./app/src/main/)**
+
+#### Linux
+1. Execute this command in the main directory:
+```bash
+codeblocks "./app/src/main/is-Engine-linux-SDL2.cbp"
+```
+2. Or open the file **is-Engine-linux-SDL2.cbp** in the location **[is-Engine-Demo/app/src/main](./app/src/main/)**.
 
 **3. Executable location**
 - The compiler files can be found in **is-Engine-Demo/app/src/main/bin-codeblocks**.
