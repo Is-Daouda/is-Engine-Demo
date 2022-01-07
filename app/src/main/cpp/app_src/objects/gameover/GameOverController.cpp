@@ -6,7 +6,7 @@ GameOverController::GameOverController(is::GameDisplay *scene) :
 {
     // Here the text is displayed depending on the screen
     float txtX(320.f), txtY((m_sceneIndex == is::DisplayOption::GAME_OVER) ? 110.f : 32.f);
-    is::createText(scene->GRMgetFont("font_title"), m_txtTitle,
+    is::createText(scene->GRMgetFont("font_msg"), m_txtTitle,
                     ((m_sceneIndex == is::DisplayOption::GAME_OVER) ?
                          is::lang::game_over[m_scene->getGameSystem().m_gameLanguage] :
                          is::lang::end_msg_congrat[m_scene->getGameSystem().m_gameLanguage]),

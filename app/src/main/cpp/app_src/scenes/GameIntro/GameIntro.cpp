@@ -12,7 +12,6 @@ void GameIntro::loadResources()
     GRMaddTexture("logo", is::GameConfig::GUI_DIR + "logo.png");
     GRMaddTexture("logo_bg", is::GameConfig::GUI_DIR + "logo_bg.png");
     GRMaddTexture("language_pad", is::GameConfig::GUI_DIR + "language_pad.png");
-    GRMaddFont("font_title", is::GameConfig::FONT_DIR + "space_ranger_halftone_italic_qz_30.otf");
 
     // load sound
     GSMaddSound("logo_sound", is::GameConfig::SFX_DIR + "logo_sound.wav");
