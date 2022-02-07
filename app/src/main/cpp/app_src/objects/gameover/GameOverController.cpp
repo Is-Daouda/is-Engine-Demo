@@ -1,4 +1,5 @@
 #include "GameOverController.h"
+#include "../../language/GameLanguage.h"
 
 GameOverController::GameOverController(is::GameDisplay *scene) :
     m_scene(scene),

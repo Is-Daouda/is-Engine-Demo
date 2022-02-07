@@ -1,4 +1,5 @@
 #include "GameIntroController.h"
+#include "../../language/GameLanguage.h"
 
 GameIntroController::GameIntroController(is::GameDisplay *scene):
     is::MainObject(),

@@ -3,6 +3,7 @@
 
 #include "../../../isEngine/system/display/GameDisplay.h"
 #include "../widgets/CancelButton.h"
+#include "../../language/GameLanguage.h"
 
 class MenuController : public is::MainObject
 {
