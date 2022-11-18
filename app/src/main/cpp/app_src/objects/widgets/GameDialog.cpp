@@ -18,6 +18,9 @@ GameDialog::GameDialog(sf::Texture &tex, sf::Font &fnt, GameDisplay *m_scene) :
     m_strName = "GameDialog"; // object name
 
     m_imageScale = 0.f;
+#if defined(IS_ENGINE_SDL_2) // Increase the rectangle size that contains the text
+    m_txtDialog.m_SDLaddTextRecWSize += 30;
+#endif
     is::createText(fnt, m_txtDialog, "", m_x, m_y, is::GameConfig::DEFAULT_RPG_DIALOG_TEXT_COLOR, is::GameConfig::DEFAULT_RPG_DIALOG_TEXT_SIZE);
     is::createText(fnt, m_txtSkip, is::lang::pad_dialog_skip[m_scene->getGameSystem().m_gameLanguage],
                    m_x, m_y, is::GameConfig::DEFAULT_RPG_DIALOG_SELECTED_TEXT_COLOR, true, is::GameConfig::DEFAULT_RPG_DIALOG_BUTTON_TEXT_SIZE);

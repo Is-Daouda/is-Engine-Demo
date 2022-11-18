@@ -28,7 +28,11 @@ public:
                          sf::Vector2f(m_scene->getViewX() - 26.f, m_scene->getViewY() - 41.f), sf::Vector2f(12.f, 24.f));
 
         is::createText(m_scene->getFontSystem(), m_txtLives, " x  " + is::numToStr(m_scene->getGameSystem().m_currentLives),
-                       m_scene->getViewX() + 15.f, is::getSFMLObjY(m_sprParent) + 12.f, sf::Color::White, true, 24);
+                       m_scene->getViewX() + 15.f, is::getSFMLObjY(m_sprParent) + 12.f
+#if defined(IS_ENGINE_SFML)
+                                      - 6.f
+#endif
+                       , sf::Color::White, true, 24);
 
         is::createRectangle(m_rec, sf::Vector2f(m_scene->getViewW(), m_scene->getViewH()), sf::Color::Black,
                             m_scene->getViewX(), m_scene->getViewY(), true);

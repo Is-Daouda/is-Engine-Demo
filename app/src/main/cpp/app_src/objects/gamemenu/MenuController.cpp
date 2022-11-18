@@ -456,7 +456,7 @@ void MenuController::step(float const &DELTA_TIME)
     // game option texts animation
     for (unsigned int i(0); i < is::arraySize(m_txtOptionValue); i++)
     {
-        m_scene->setTextAnimation(m_txtOptionValue[i], m_gameOptionIndex, i);
+        is::setTextAnimation(m_txtOptionValue[i], m_gameOptionIndex, i);
         is::scaleAnimation(DELTA_TIME, m_txtOptionScale[i], m_txtOptionValue[i]);
     }
 
