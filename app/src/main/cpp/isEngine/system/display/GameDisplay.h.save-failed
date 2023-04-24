@@ -28,7 +28,7 @@
 #include "SDM.h"
 #else
 #include "../entity/MainObject.h"
-#endif
+#endif // defined
 
 #include "../sound/GSM.h"
 #include "../graphic/GRM.h"
@@ -47,7 +47,7 @@ class GameDisplay
     : public SDM, public GSM, public GRM
 #else
     : public GSM, public GRM
-#endif
+#endif // defined
 {
 public:
     bool m_isClosed;
@@ -75,7 +75,7 @@ public:
     {
         SDMmanageScene(); // Let SDM manage the scene
     }
-    #endif
+    #endif // defined
 
     ////////////////////////////////////////////////////////////
     /// \brief Method to implement drawing code
@@ -196,10 +196,10 @@ public:
     virtual const sf::View& getView() const noexcept {return m_view;}
 
     /// Return current mouse position
-    virtual sf::Vector2f& getMousePosCurrent() {return m_mousePosCurrent;}
+    virtual sf::Vector2f& getMousePosCurrent() const noexcept {return m_mousePosCurrent;}
 
     /// Return previous mouse position
-    virtual sf::Vector2f& getMousePosPrevious() {return m_mousePosPrevious;}
+    virtual sf::Vector2f& getMousePosPrevious() const noexcept {return m_mousePosPrevious;}
 
     /// Return render window
     virtual sf::RenderWindow& getRenderWindow() const {return m_window;}
@@ -256,13 +256,14 @@ public:
     virtual float getViewH() const {return m_viewH;}
 
     /// Return Cursor Position
-    virtual sf::Vector2f getCursor(unsigned int finger = 0) const;
+    virtual sf::Vector2f getCursor(
+                                    #if defined(__ANDROID__)
+                                    unsigned int finger = 0
+                                    #endif // defined
+                                   ) const;
 
     /// Get mouse in collision
-    bool getMouseInCollision() {return m_mouseInCollision;}
-
-    /// Check if mouse current position is equal to previous position
-    bool getMouseCurrentEqualToPrevious();
+    bool getMouseInCollision();
 
     /// Return the scene background color
     virtual sf::Color& getBgColor() {return m_windowBgColor;}
@@ -281,9 +282,17 @@ public:
     /// \param finger Finger index (on Android)
     //////////////////////////////////////////////////////
     template <class T>
-    bool mouseCollision(T const &obj, unsigned int finger = 0)
+    bool mouseCollision(T const &obj
+                        #if defined(__ANDROID__)
+                        , unsigned int finger = 0
+                        #endif // defined
+                        )
     {
-        return is::mouseCollision(m_window, obj, finger);
+        return is::mouseCollision(m_window, obj
+#if defined(__ANDROID__)
+                                  , finger
+#endif
+                                  );
     }
 
     //////////////////////////////////////////////////////
@@ -295,9 +304,17 @@ public:
     /// \param finger Finger index (on Android)
     //////////////////////////////////////////////////////
     template <class T>
-    bool mouseCollision(T const &obj, sf::Vector2f &position, unsigned int finger = 0)
+    bool mouseCollision(T const &obj, sf::Vector2f &position
+                        #if defined(__ANDROID__)
+                        , unsigned int finger = 0
+                        #endif // defined
+                        )
     {
-        return is::mouseCollision(m_window, obj, position, finger);
+        return is::mouseCollision(m_window, obj, position
+#if defined(__ANDROID__)
+                                 , finger
+#endif
+                                 );
     }
 
     #if defined(IS_ENGINE_USE_SDM)
@@ -323,8 +340,8 @@ public:
 
     /// Allows to create a sprite by associating a texture to it.
     /// It is also used to blit sprites but only works with SDL.
-    virtual void createSprite(const std::string &spriteName, is::MainObject &obj, sf::IntRect rec, sf::Vector2f position, sf::Vector2f origin, sf::Vector2f scale = sf::Vector2f(1.f, 1.f), unsigned int alpha = 255);
-    #endif
+    virtual void createSprite(std::string const &spriteName, is::MainObject &obj, sf::IntRect rec, sf::Vector2f position, sf::Vector2f origin, sf::Vector2f scale = sf::Vector2f(1.f, 1.f), unsigned int alpha = 255);
+    #endif // defined
 
     /// Allows to play sound in container by his name if the option is activated
     virtual void GSMplaySound(const std::string& name)
@@ -416,7 +433,7 @@ public:
 ////////////////////////////////////////////////////////////
 
     /// Show message box according to type
-    void showMessageBox(const std::string &msgBody, bool mbYesNo = true);
+    void showMessageBox(std::string const &msgBody, bool mbYesNo = true);
 
     /// Show message box according to type
     void showMessageBox(std::wstring const &msgBody, bool mbYesNo = true);
@@ -474,7 +491,7 @@ protected:
     bool m_windowIsActive;
     bool m_isPlaying, m_sceneStart, m_sceneEnd;
     bool m_keyBackPressed;
-    bool m_showMsg, m_mbYesNo, m_msgBoxMouseInCollision, m_mouseInCollision;
+    bool m_showMsg, m_mbYesNo, m_msgBoxMouseInCollison, m_mouseInCollision;
 
     sf::Sprite m_sprMsgBox, m_sprMsgBoxButton1, m_sprMsgBoxButton2, m_sprMsgBoxButton3;
     sf::Sprite m_sprLoading;
