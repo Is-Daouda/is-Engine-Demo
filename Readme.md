@@ -51,7 +51,7 @@ pacman -S switch-sdl2 switch-sdl2_image switch-sdl2_mixer switch-sdl2_net switch
 7. Run the file **[copy_assets.cmd](./app/src/main/copy_assets.cmd)** so that it transfers your resources which are in the **[assets](./app/src/main/assets) folder** to romfs (this folder will be created when executing the copy_assets.cmd file) necessary for the compilation.
 8. Enter these commands in the console:
 ```bash
-cd c:/is-Engine/app/src/main/
+cd c:/is-Engine-Demo/app/src/main/
 make
 ```
 
@@ -105,10 +105,10 @@ If all goes well you will have a **Hello World Screen** on your **Android emulat
 - Note that this part is only required if you want to use the game engine data save / load functions.
 
 **3. Adding Source Files**
-- So that Android Studio can detect your source files (.cpp) you must include them in the **[app_src.cmake](./app/src/main/cmake/app_src.cmake) or [isengine.cmake](./app/src/main/cmake/isengine.cmake)** file which is located in the **[is-Engine/app/src/main/cmake](./app/src/main/cmake/)** location.
+- So that Android Studio can detect your source files (.cpp) you must include them in the **[app_src.cmake](./app/src/main/cmake/app_src.cmake) or [isengine.cmake](./app/src/main/cmake/isengine.cmake)** file which is located in the **[is-Engine-Demo/app/src/main/cmake](./app/src/main/cmake/)** location.
 
 **4. Application location**
-- The application can be found in **is-Engine/app/build/outputs/apk**.
+- The application can be found in **is-Engine-Demo/app/build/outputs/apk**.
 
 ---
 
@@ -132,7 +132,7 @@ If you want to make your SFML project compatible with the Web (Be able to run it
 5. Move the **is-Engine** project to your **C:/ (C:/is-Engine)**.
 6. Execute this command :
 ```bash
-cd c:/is-Engine/app/src/main
+cd c:/is-Engine-Demo/app/src/main
 mkdir bin-web
 cd bin-web
 emsdk activate latest
@@ -149,7 +149,7 @@ If all goes well you will have a **Hello World Screen** on your **Web Browser**.
 **Enjoy!**
 
 **3. Adding Source Files**
-- In order for CMake to detect your source files (.cpp) you must include them in the **[app_src.cmake](./app/src/main/cmake/app_src.cmake) or [isengine.cmake](./app/src/main/cmake/isengine.cmake)** file which is located in the **[is-Engine/app/src/main/cmake](./app/src/main/cmake/)** location.
+- In order for CMake to detect your source files (.cpp) you must include them in the **[app_src.cmake](./app/src/main/cmake/app_src.cmake) or [isengine.cmake](./app/src/main/cmake/isengine.cmake)** file which is located in the **[is-Engine-Demo/app/src/main/cmake](./app/src/main/cmake/)** location.
 
 ## ![danger](https://i48.servimg.com/u/f48/20/16/75/27/icon_d10.png) Very important
 - **is::Engine** works on the Web thanks to **SDL 2**.
@@ -215,7 +215,7 @@ sudo make
 - You will have a **bin** folder in which the engine demo is located.
 
 **5. Adding Source Files**
-- In order for CMake to detect your source files (.cpp) you must include them in the **[app_src.cmake](./app/src/main/cmake/app_src.cmake) or [isengine.cmake](./app/src/main/cmake/isengine.cmake)** file which is located in the **[is-Engine/app/src/main/cmake](./app/src/main/cmake/)** location.
+- In order for CMake to detect your source files (.cpp) you must include them in the **[app_src.cmake](./app/src/main/cmake/app_src.cmake) or [isengine.cmake](./app/src/main/cmake/isengine.cmake)** file which is located in the **[is-Engine-Demo/app/src/main/cmake](./app/src/main/cmake/)** location.
 
 ---
 
@@ -227,7 +227,7 @@ Download Visual Studio Community 2022 [here](https://visualstudio.microsoft.com/
 
 **2. Opening the project with the IDE:**
 #### Windows
-Open the file **vs-sfml.sln** in the location **[is-Engine/app/src/main/](./app/src/main/)**
+Open the file **vs-sfml.sln** in the location **[is-Engine-Demo/app/src/main/](./app/src/main/)**
 
 ---
 
@@ -242,10 +242,10 @@ Open the file **vs-sfml.sln** in the location **[is-Engine/app/src/main/](./app/
 
 #### Windows
 1. Run the file **open_qt_creator.bat** in the main directory *(Make sure you have included the path to the Qt executable in your PATH environment variable)*.
-2. Or open the file **is-Engine.pro** in the location **[is-Engine/app/src/main/qt](./app/src/main/qt/)**
+2. Or open the file **is-Engine.pro** in the location **[is-Engine-Demo/app/src/main/qt](./app/src/main/qt/)**
 
 **3. Executable location**
-- The compiler files can be found in **is-Engine/app/src/main/bin-Qt**.
+- The compiler files can be found in **is-Engine-Demo/app/src/main/bin-Qt**.
 
 ---
 
@@ -271,7 +271,7 @@ This project uses the template of **andrew-r-king**. For more information on thi
 2. Run **sudo apt install libsfml-dev**. The SFML version you got will vary depending on the distro. 2.5.1 is included in [Ubuntu 19.04 Disco Dingo](http://cdimage.ubuntu.com/daily-live/current/HEADER.html) for example.
 
 **3. Opening the project with the IDE:**
-- Rename the **Makefile-vscode** file to **Makefile** in **[is-Engine/app/src/main/](./app/src/main/)**.
+- Rename the **Makefile-vscode** file to **Makefile** in **[is-Engine-Demo/app/src/main/](./app/src/main/)**.
 #### Windows
 1. Run the file **open_vscode.bat** in the main directory.
 
@@ -282,10 +282,10 @@ code -n "./app/src/main"
 ```
 
 #### All
-3. Or open the **[is-Engine/app/src/main](./app/src/main/)** folder with **Solution Explorer**.
+3. Or open the **[is-Engine-Demo/app/src/main](./app/src/main/)** folder with **Solution Explorer**.
 
 **4. Executable location**
-- The compiler files can be found in **is-Engine/app/src/main/bin-vscode**.
+- The compiler files can be found in **is-Engine-Demo/app/src/main/bin-vscode**.
 
 ---
 
@@ -304,17 +304,17 @@ code -n "./app/src/main"
 **2. Opening the project with the IDE:**
 #### Windows
 1. Run the file **open_codeblocks.bat** in the main directory *(Make sure you have included the path to the Code::Blocks executable in your PATH environment variable)*.
-2. Or open the file **is-Engine-windows.cbp** in the location **[is-Engine/app/src/main](./app/src/main/)**
+2. Or open the file **is-Engine-windows.cbp** in the location **[is-Engine-Demo/app/src/main](./app/src/main/)**
 
 #### Linux
 1. Execute this command in the main directory:
 ```bash
 codeblocks "./app/src/main/is-Engine-linux.cbp"
 ```
-2. Or open the file **is-Engine-linux.cbp** in the location **[is-Engine/app/src/main](./app/src/main/)**.
+2. Or open the file **is-Engine-linux.cbp** in the location **[is-Engine-Demo/app/src/main](./app/src/main/)**.
 
 **3. Executable location**
-- The compiler files can be found in **is-Engine/app/src/main/bin-codeblocks**.
+- The compiler files can be found in **is-Engine-Demo/app/src/main/bin-codeblocks**.
 
 ---
 
@@ -334,17 +334,17 @@ codeblocks "./app/src/main/is-Engine-linux.cbp"
 **2. Opening the project with the IDE:**
 #### Windows
 1. Run the file **open_codeblocks_sdl.bat** in the main directory *(Make sure you have included the path to the Code::Blocks executable in your PATH environment variable)*.
-2. Or open the file **is-Engine-windows-SDL2.cbp** in the location **[is-Engine/app/src/main](./app/src/main/)**
+2. Or open the file **is-Engine-windows-SDL2.cbp** in the location **[is-Engine-Demo/app/src/main](./app/src/main/)**
 
 #### Linux
 1. Execute this command in the main directory:
 ```bash
 codeblocks "./app/src/main/is-Engine-linux-SDL2.cbp"
 ```
-2. Or open the file **is-Engine-linux-SDL2.cbp** in the location **[is-Engine/app/src/main](./app/src/main/)**.
+2. Or open the file **is-Engine-linux-SDL2.cbp** in the location **[is-Engine-Demo/app/src/main](./app/src/main/)**.
 
 **3. Executable location**
-- The compiler files can be found in **is-Engine/app/src/main/bin-codeblocks**.
+- The compiler files can be found in **is-Engine-Demo/app/src/main/bin-codeblocks**.
 
 ## ![danger](https://i48.servimg.com/u/f48/20/16/75/27/icon_d10.png) Very important
 - If you want to use SDL functions in your source code, use the **IS_ENGINE_SDL_2 macro**.
@@ -354,26 +354,26 @@ codeblocks "./app/src/main/is-Engine-linux-SDL2.cbp"
 
 ## ![icon](https://i48.servimg.com/u/f48/20/16/75/27/icon10.png) Change application icon:
 #### Nintendo Switch
-- To change the icon of the application you must go to the location **[is-Engine/app/src/main/](./app/src/main/)**.
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/](./app/src/main/)**.
 
 #### Android
-- To change the icon of the application you must go to the location **[is-Engine/app/src/main/res](./app/src/main/res/)** replace all the images (PNG) which are in the **drawable** subfolders.
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/res](./app/src/main/res/)** replace all the images (PNG) which are in the **drawable** subfolders.
 
 #### Web (HTML 5 - CSS 3)
-- To change the icon of the application you must go to the location **[is-Engine/app/src/main/web](./app/src/main/web/)**.
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/web](./app/src/main/web/)**.
 
 #### Windows
-- To change the icon of the application you must go to the location **[is-Engine/app/src/main/env/windows](./app/src/main/env/windows)** replace all the images **(Attention CMake uses the same resources).**
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/env/windows](./app/src/main/env/windows)** replace all the images **(Attention CMake uses the same resources).**
 
 #### Linux
-- To change the icon of the application you must go to the location **[is-Engine/app/src/main/env/linux](./app/src/main/env/linux)**.
+- To change the icon of the application you must go to the location **[is-Engine-Demo/app/src/main/env/linux](./app/src/main/env/linux)**.
 
 ---
 
 ## Description of the project structure:
 ![header](./images/is_Engine_structure.png)
 ----------------------------
-- The source files of the project can be found in the **[is-Engine/app/src/main/cpp](./app/src/main/cpp/)** location.
+- The source files of the project can be found in the **[is-Engine-Demo/app/src/main/cpp](./app/src/main/cpp/)** location.
 
 #### 1. [main.cpp](./app/src/main/cpp/main.cpp) file
 Contains the entry point of the program, inside there are two instructions :
