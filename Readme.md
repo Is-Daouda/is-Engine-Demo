@@ -233,6 +233,19 @@ Open the file **vs-sfml.sln** in the location **[is-Engine-Demo/app/src/main/](.
 
 ---
 
+## ![vssdl](https://i48.servimg.com/u/f48/20/16/75/27/vs_ima11.png) Visual Studio SDL 2
+
+**1. Installation**
+#### Windows
+1. Download Visual Studio Community 2022 [here](https://visualstudio.microsoft.com/fr/vs/community/) and install it.
+2. Download this [file](https://github.com/GlowCheese/SDL2-Setup/releases/download/v1.1.0/SDL2.Compiler.zip) and extract it to C:\ (**the location of the folder must be C:\SDL2-2.26.3. Otherwise it will not work.**).
+
+**2. Opening the project with the IDE:**
+#### Windows
+Open the file **SDL2_SFML.sln** in the location **[is-Engine/app/src/main/](./app/src/main/)**
+
+---
+
 ## ![qt](https://i48.servimg.com/u/f48/20/16/75/27/qt_ico10.png) Qt
 
 **1. Installation**
