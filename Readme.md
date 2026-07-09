@@ -34,7 +34,6 @@ This project uses the template of **[carstene1ns](https://github.com/carstene1ns
 - All your source files (only .cpp or .c) must be located in the root of the **[cpp](./app/src/main/cpp/)** folder otherwise the compiler will not find them!
 - The Switch uses the same touch functions as Android.
 - The engine has been configured so that you can use the PC functions **keyIsPressed(is::GameConfig::KEY_UP)** or **keyIsPressed(is::GameConfig::KEY_A), etc.** on the Switch.
-- Some SFML functions like: **Render Texture** are not yet supported. These additions will be made soon!
 
 **2. Installation**
 ##### Windows
@@ -75,7 +74,6 @@ This project uses the template of **[Georgik](https://github.com/georgik/sdl2-an
 ## ![danger](https://i48.servimg.com/u/f48/20/16/75/27/icon_d10.png) Very important
 - On Android SFML games run with SDL library. If you want to use SDL functions in your source code, use the **IS_ENGINE_SDL_2 macro**.
 - The audio format supported at the moment is **.WAV**
-- Some SFML functions like: **Render Texture** are not yet supported. These additions will be made soon!
 - **Your help to improve the engine will be welcome!**
 - [Please read this](#Contribute).
 
@@ -157,7 +155,6 @@ If all goes well you will have a **Hello World Screen** on your **Web Browser**.
 - **is::Engine** works on the Web thanks to **SDL 2**.
 - These libraries: **TMXLite, TMXLoader, TinyFileDialog** are not supported in the web version of is::Engine.
 - If you want to use SDL functions in your source code, use the **IS_ENGINE_SDL_2 macro**.
-- Note that some SFML functions like: **Render Texture** are not yet supported. These additions will be made soon!
 
 ---
 
@@ -363,7 +360,6 @@ codeblocks "./app/src/main/is-Engine-linux-SDL2.cbp"
 
 ## ![danger](https://i48.servimg.com/u/f48/20/16/75/27/icon_d10.png) Very important
 - If you want to use SDL functions in your source code, use the **IS_ENGINE_SDL_2 macro**.
-- Note that some SFML functions like: **Render Texture** are not yet supported. These additions will be made soon!
 
 ---
 
